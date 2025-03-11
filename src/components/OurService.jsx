@@ -36,12 +36,12 @@ const OurService = () => {
    <section id='service'>
      <div className="py-6 lg:pb-16 bg-gray-100">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-8 text-[#123b49] ">Our Services</h2>
+        <h2 className="text-3xl font-bold text-center mb-8 text-black ">Our Services</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((service) => (
             <div
               key={service.id}
-              className="bg-[#123b49] rounded-lg shadow-lg p-6 flex flex-col items-center text-center transition-transform transform duration-500 hover:scale-105"
+              className="bg-green-800 rounded-lg shadow-lg p-6 flex flex-col items-center text-center transition-transform transform duration-500 hover:scale-105"
             >
               <div className="text-4xl mb-4 text-white">{service.icon}</div>
               <h3 className="text-xl font-semibold mb-2 text-[#ffffff] font-">{service.title}</h3>

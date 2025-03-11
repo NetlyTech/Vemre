@@ -35,7 +35,7 @@ const Teams = () => {
     <section id='team'>
       <div className="py-10 bg-[#ccd5d4]">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-8">Meet Our Team</h2>
+          <h2 className="text-lg md:text-2xl lg:text-3xl font-bold text-center mb-8 font-sans">Meet Our Team</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {teamMembers.map((member) => (
               <TeamMemberCard key={member.id} member={member} />
@@ -56,22 +56,22 @@ const TeamMemberCard = ({ member }) => {
 
   return (
     <div
-      className="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center text-center transition-transform transform duration-500 hover:scale-105"
+      className="bg-green-800 rounded-lg shadow-lg p-6 flex flex-col items-center text-center transition-transform transform duration-500 hover:scale-105"
     >
       <img
         src={member.image}
         alt={member.name}
         className="w-32 h-32 rounded-full mb-4"
       />
-      <h3 className="text-xl font-semibold">{member.name}</h3>
-      <h3 className="text-xs">{member.qualification}</h3>
-      <p className="text-gray-600">{member.title}</p>
-      <p className="text-gray-500 mt-2">
+      <h3 className="text-xl font-semibold text-gray-100">{member.name}</h3>
+      <h3 className="text-xs text-gray-100">{member.qualification}</h3>
+      <p className="text-gray-100">{member.title}</p>
+      <p className="text-gray-100 mt-2">
         {isExpanded ? member.description : `${member.description.substring(0, 100)}...`}
       </p>
       <button
         onClick={toggleDescription}
-        className="mt-2 text-green-600 hover:underline"
+        className="mt-2 text-white cursor-pointer font-bold hover:underline"
       >
         {isExpanded ? 'Read Less' : 'Read More'}
       </button>

@@ -24,13 +24,15 @@ const Navbar = () => {
     { id: 2, text: 'Services', sectionId: 'service' },
     { id: 3, text: 'About', sectionId: 'about' },
     { id: 4, text: 'Team', sectionId: 'team' },
-    { id: 5, text: 'Contact', sectionId: 'contact' },
+    // { id: 5, text: 'Impact', sectionId: 'impact' },
+    { id: 6, text: 'Contact', sectionId: 'contact' },
   ];
 
   // 0b81a5
+  // 0b573d
 
   return (
-    <div className='bg-[#0b81a5] font-bold flex justify-between items-center h-18 md:h-20 lg:h-18 mx-auto lg:text-[16px] text-[#ffffff] lg:pr-8 sticky top-0 z-50'>
+    <div className='bg-[#0b573d] font-bold flex justify-between items-center h-18 md:h-20 lg:h-18 mx-auto lg:text-[16px] text-[#ffffff] lg:pr-8 sticky top-0 z-50'>
       {/* Logo */}
       <img src={VemreLogo} alt="" className='w-30 h-28 md:w-36 md:h-[140px] lg:pb-1' /> 
 
@@ -56,7 +58,7 @@ const Navbar = () => {
       <ul
         className={
           nav
-            ? 'fixed md:hidden left-0 top-0 w-[60%] h-full border-r border-r-gray-100 bg-[#0b81a5] ease-in-out duration-500 z-999'
+            ? 'fixed md:hidden left-0 top-0 w-[60%] h-full border-r border-r-gray-100 bg-[#0b573d] ease-in-out duration-500 z-999'
             : 'ease-in-out w-[60%] duration-500 fixed top-0 bottom-0 left-[-100%] z-999'
         }
       >

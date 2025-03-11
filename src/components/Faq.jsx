@@ -4,7 +4,7 @@ import { IoIosArrowUp } from "react-icons/io";
 
 const AccordionItem = ({ title, content, isOpen, onToggle }) => {
   return (
-    <div className="border-2 border-gray-300 mx-4 md:mx-12 lg:border rounded-2xl my-3">
+    <div className="border-2 border-green-800 mx-4 md:mx-12 lg:border-3 rounded-2xl my-3">
       <div
         className="flex justify-between items-center p-4 cursor-pointer transition duration-300 ease-in-out"
         onClick={onToggle}
@@ -55,9 +55,9 @@ const Accordion = () => {
   };
 
   return (
-    <div className='flex flex-col font-font3 text-gray-800 bg-white'>
+    <div className='flex flex-col font-font3 text-black bg-[#ccd5d4]'>
           <div className='pt-6 pb-3 lg:pt-12'>
-            <h1 className='text-lg md:text-xl lg:text-2xl font-semibold text-center'>Frequently Asked Questions</h1>
+            <h1 className='text-lg md:text-2xl lg:text-3xl font-sans font-bold text-center'>FAQs</h1>
           </div>
       <div className="lg:px-48 lg:pt-10 lg:pb-10">
       {items.map((item, index) => (

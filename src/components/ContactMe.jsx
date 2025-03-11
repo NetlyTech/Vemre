@@ -1,10 +1,11 @@
 // src/ContactMe.jsx
 import React from 'react';
+// 0b81a5
 
 const ContactMe = () => {
   return (
     <section id='contact'>
-    <div className="bg-[#0b81a5] flex flex-col md:flex-row p-6 lg:px-16">
+    <div className="bg-green-800 flex flex-col md:flex-row p-6 lg:px-16">
       <div className="md:w-1/2 p-4 text-white">
         <h4 className="text-sm md:text-2xl font-extrabold mb-4">Get In Touch</h4>
         <h1 className="text-lg md:text-[20px] font-bold mb-2">Visit us on site or contact us today</h1>
