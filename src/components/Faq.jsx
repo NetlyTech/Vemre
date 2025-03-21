@@ -9,7 +9,7 @@ const AccordionItem = ({ title, content, isOpen, onToggle }) => {
         className="flex justify-between items-center p-4 cursor-pointer transition duration-300 ease-in-out"
         onClick={onToggle}
       >
-        <h2 className="relative text-[14px] lg:px-0 lg:text-xl font-semibold">{title}</h2>
+        <h2 className="relative text-[12px] lg:px-0 lg:text-xl font-semibold">{title}</h2>
         
         <span className='absolute right-12 md:right-20 md:text-xl text-lg lg:right-72 lg:text-3xl'>{isOpen ? <IoIosArrowUp /> : <IoIosArrowDown /> }</span>
       </div>
@@ -57,7 +57,7 @@ const Accordion = () => {
   return (
     <div className='flex flex-col font-font3 text-black bg-[#ccd5d4]'>
           <div className='pt-6 pb-3 lg:pt-12'>
-            <h1 className='text-lg md:text-2xl lg:text-3xl font-sans font-bold text-center'>FAQs</h1>
+            <h1 className='text-sm md:text-2xl lg:text-3xl font-sans font-bold text-center'>FAQs</h1>
           </div>
       <div className="lg:px-48 lg:pt-10 lg:pb-10">
       {items.map((item, index) => (
