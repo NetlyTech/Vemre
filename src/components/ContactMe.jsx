@@ -12,7 +12,7 @@ const ContactMe = () => {
         <p className="mb-2 py-2 lg:py-4"><strong>Address:</strong> 3826 Salem Rd Suite 194
         Covington GA 30016</p>
         <p className="mb-2 py-2 lg:py-4"><strong>Email:</strong> Info@vemre.com.</p>
-        <p className="mb-2 py-2 lg:py-4"><strong>Phone:</strong> +1 612-458-6552</p>
+        <p className="mb-2 py-2 lg:py-4"><strong>Phone:</strong> +17064318217</p>
         <p className="mb-2 py-2 lg:py-4"><strong>Time:</strong> 9:00am - 4:00pm, Mon - Sat</p>
       </div>
       <div className="md:w-1/2 p-4">

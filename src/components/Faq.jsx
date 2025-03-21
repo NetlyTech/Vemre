@@ -23,30 +23,30 @@ const Accordion = () => {
 
   const items = [
     {
-      title: 'QUESTION 1',
-      content: 'ANSWER 1',
+      title: 'What services does Vemre offer?',
+      content: 'Vemre provides international payment solutions, equipment/software loaning, third-party integration, and customer-driven tech solutions.',
     },
     
     {
-      title: 'QUESTION 2',
-      content: 'ANSWER 2',
+      title: 'How does Vemre help Nigerian Tech Savvies?',
+      content: 'We bridge the gap between Nigerian tech professionals and the global market, ensuring seamless service delivery and international payments.',
     },
     {
-      title: 'QUESTION 3',
-      content: "ANSWER 3",
+      title: 'Is Vemre’s international payment gateway secure?',
+      content: "Yes, our SRER (Secure, Reliable, Easy, and Robust) payment gateway ensures safe and efficient international transactions.",
     },
     {
-      title: 'QUESTION 4',
-      content: 'ANSWER 4',
+      title: 'Can I rent or loan tech equipment from Vemre?',
+      content: 'Yes, we offer loaning and renting of high-end technological equipment and software to support tech professionals.',
     },
 
     {
-      title: 'QUESTION 5',
-      content: "ANSWER 5",
+      title: 'How do I get started with Vemre?',
+      content: "Simply sign up on our platform, explore our services, and start accessing global opportunities with ease.",
     },
     {
-      title: 'QUESTION 6',
-      content: "ANSWER 6",
+      title: 'How can I contact Vemre for support?',
+      content: "You can reach us via email at Info@vemre.com, call +1 612-458-6552, or visit our office in Covington, GA.",
     },
   ];
 

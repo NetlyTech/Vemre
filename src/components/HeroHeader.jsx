@@ -44,6 +44,7 @@ const HeroHeader = () => {
   };
 
   return (
+    <section id='home'>
     <div className="relative w-full h-80 md:h-[450px] lg:h-[480px] overflow-hidden">
       {slides.map((slide, index) => (
         <div
@@ -78,6 +79,7 @@ const HeroHeader = () => {
         &#10095;
       </button>
     </div>
+    </section>
   );
 };
 

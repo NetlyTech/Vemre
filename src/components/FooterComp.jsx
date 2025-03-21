@@ -68,7 +68,7 @@ const FooterComp = () => {
           <p className="text-[12px] md:text-[16px] py-4">&copy; {new Date().getFullYear()} Vemre. All rights reserved.</p>
         </div>
         <div>
-          <p className="text-[10px] md:text-sm pb-4 border-t py-2">Designed & Developed by <a className='text-teal-300 underline font-bold font-font2 text-xs md:text-sm hover:text-teal-400' target='blank' href="https://wa.me/message/4QUX4TP6QSK7C1">Netly Tech Solutions</a></p>
+          <p className="text-[10px] md:text-sm pb-4 border-t py-2">Designed & Developed by <a className='text-teal-300 underline font-bold font-font2 text-xs md:text-sm hover:text-teal-400' target='blank' href="https://wa.me/qr/CCIUARQOPG7QH1">Netly Tech Solutions</a></p>
         </div>
       </div>
     </footer>

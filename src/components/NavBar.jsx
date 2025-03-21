@@ -34,7 +34,7 @@ const Navbar = () => {
   return (
     <div className='bg-[#0b573d] font-bold flex justify-between items-center h-18 md:h-20 lg:h-18 mx-auto lg:text-[16px] text-[#ffffff] lg:pr-8 sticky top-0 z-50'>
       {/* Logo */}
-      <img src={VemreLogo} alt="" className='w-30 h-28 md:w-36 md:h-[140px] lg:pb-1' /> 
+     <a href="#"> <img src={VemreLogo} alt="" className='cursor-pointer w-30 h-28 md:w-36 md:h-[140px] lg:pb-1' /></a> 
 
       {/* Desktop Navigation */}
       <ul className='hidden md:flex'>
@@ -63,7 +63,7 @@ const Navbar = () => {
         }
       >
         {/* Mobile Logo */}
-        <img src={VemreLogo} alt="" className='pr-4 w-36 h-32 lg:w-36 lg:h-[140px] lg:pb-1' /> 
+        <a href="#"><img src={VemreLogo} alt="" className='pr-4 w-36 h-32 lg:w-36 lg:h-[140px] lg:pb-1 cursor-pointer' /> </a>
 
         {/* Mobile Navigation Items */}
         {navItems.map(item => (
