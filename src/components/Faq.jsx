@@ -24,7 +24,7 @@ const Accordion = () => {
   const items = [
     {
       title: 'What services does Vemre offer?',
-      content: 'Vemre provides international payment solutions, equipment/software loaning, third-party integration, and customer-driven tech solutions.',
+      content: 'Vemre provides international payment solutions, equipment/software renting, third-party integration, and customer-driven tech solutions.',
     },
     
     {
@@ -36,8 +36,8 @@ const Accordion = () => {
       content: "Yes, our SRER (Secure, Reliable, Easy, and Robust) payment gateway ensures safe and efficient international transactions.",
     },
     {
-      title: 'Can I rent or loan tech equipment from Vemre?',
-      content: 'Yes, we offer loaning and renting of high-end technological equipment and software to support tech professionals.',
+      title: 'Can I rent tech equipment from Vemre?',
+      content: 'Yes, we offer renting of high-end technological equipment and software to support tech professionals.',
     },
 
     {
@@ -46,7 +46,7 @@ const Accordion = () => {
     },
     {
       title: 'How can I contact Vemre for support?',
-      content: "You can reach us via email at Info@vemre.com, call +1 612-458-6552, or visit our office in Covington, GA.",
+      content: "You can reach us via email at Info@vemre.com, call +1 404 939 3126, or visit our office in Covington, GA.",
     },
   ];
 

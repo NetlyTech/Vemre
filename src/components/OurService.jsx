@@ -13,8 +13,8 @@ const services = [
   },
   {
     id: 2,
-    title: 'Loaning/Renting',
-    description: '⁠Loaning/Renting of high end and advanced technological equipment and softwares to Tech Savvies.',
+    title: 'Rent a workstation',
+    description: 'Rent a workstation of high end and advanced technological equipment and softwares to Tech Savvies.',
     icon: <FaComputer /> ,
   },
   {

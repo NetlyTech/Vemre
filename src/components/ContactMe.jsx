@@ -9,10 +9,12 @@ const ContactMe = () => {
       <div className="md:w-1/2 p-4 text-white">
         <h4 className="text-sm md:text-2xl font-extrabold mb-4">Get In Touch</h4>
         <h1 className="text-lg md:text-[20px] font-bold mb-2">Visit us on site or contact us today</h1>
-        <p className="mb-2 py-2 lg:py-4"><strong>Address:</strong> 3826 Salem Rd Suite 194
+        
+        <p className="mb-2 py-2 lg:py-4"><strong>Head Office:</strong> 3826 Salem Rd Suite 194
         Covington GA 30016</p>
+        <p className="mb-2 py-2 lg:py-4"><strong>Branch:</strong>  6, Alajorin Street, Ilorin, Kwara State, Nigeria.</p>
         <p className="mb-2 py-2 lg:py-4"><strong>Email:</strong> Info@vemre.com.</p>
-        <p className="mb-2 py-2 lg:py-4"><strong>Phone:</strong> +17064318217</p>
+        <p className="mb-2 py-2 lg:py-4"><strong>Phone:</strong> +1 404 939 3126.</p>
         <p className="mb-2 py-2 lg:py-4"><strong>Time:</strong> 9:00am - 4:00pm, Mon - Sat</p>
       </div>
       <div className="md:w-1/2 p-4">

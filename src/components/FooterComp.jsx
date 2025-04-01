@@ -2,7 +2,7 @@
 import React from 'react';
 import VemreLogo from '../components/logo/vemre1.png';
 import Stripe from '../components/logo/stripe.jpeg';
-import Lemfi from '../components/logo/lemfi.jpeg';
+import Efcc from '../components/logo/efcc.jpg';
 import { FaGooglePlay } from "react-icons/fa6";
 import { FaApple } from "react-icons/fa";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
@@ -19,9 +19,9 @@ const FooterComp = () => {
           <div className='flex flex-col items-center md:items-start py-4 px-14 md:px-4 lg:px-16'>
             <h1 className='text-center px-2 font-semibold pl-2 md:pr-10 py-2 text-lg md:text-xl lg:text-2xl'>Our Partners</h1>
             <div className='flex flex-row justify-center md:justify-start'>
-              <img src={Stripe} alt="Stripe Logo" className='rounded-full mx-2 size-12 md:ml-10'/>
-              {/* Uncomment if you want to include Lemfi logo */}
-              {/* <img src={Lemfi} alt="Lemfi Logo" className='rounded-full mx-2' /> */}
+              <img src={Stripe} alt="Stripe Logo" className='rounded-full mx-2 size-12 md:ml-2 lg:ml-4'/>
+              
+               <img src={Efcc} alt="Efcc Logo" className='rounded-full mx-2 size-12' /> 
             </div>
           </div>
 

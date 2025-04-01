@@ -6,7 +6,7 @@ import slide3 from './pics/3rdslide copy.jpg';
 const slides = [
   {
     id: 1,
-    title: 'Welcome to Our Website',
+    title: 'Welcome to Vemre',
     description: 'Naija Tech Savvies Penetrating the Global Tech Space with Ease.',
     image: slide1 ,
   },
