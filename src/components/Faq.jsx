@@ -46,7 +46,7 @@ const Accordion = () => {
     },
     {
       title: 'How can I contact Vemre for support?',
-      content: "You can reach us via email at Info@vemre.com, call +1 404 939 3126, or visit our office in Covington, GA.",
+      content: "You can reach us via email at Info@vemre.com, call +1 404 939 3126, or visit our offices.",
     },
   ];
 

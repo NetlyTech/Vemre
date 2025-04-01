@@ -14,7 +14,7 @@ const services = [
   {
     id: 2,
     title: 'Rent a workstation',
-    description: 'Rent a workstation of high end and advanced technological equipment and softwares to Tech Savvies.',
+    description: 'Rent a workstation with high end and advanced technological equipment and softwares to Tech Savvies.',
     icon: <FaComputer /> ,
   },
   {

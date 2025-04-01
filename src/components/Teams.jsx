@@ -8,7 +8,7 @@ const teamMembers = [
     id: 1,
     name: 'VICTOR OLUSHOLA AREMU',
     qualification: '(B.Tech, MsCIA, CISA, CEH, CHFI)',
-    title: 'Position',
+    title: 'Founders',
     image: man1,
     description: 'Decorated Sergeant with 10 years of service in the US Army, leading high-performing teams in dynamic environments. Expert Cybersecurity Analyst with proficiency in threat analysis, penetration testing, and incident response. Holding industry-recognized certifications, with a unique blend of military leadership and technical expertise, driving innovative cybersecurity solutions.',
   },
@@ -16,7 +16,7 @@ const teamMembers = [
     id: 2,
     name: '⁠TEMIDAYO OLUWASEGUN ABIODUN',
     qualification: '(B.Ed, MBA, fCMgr)',
-    title: 'Position',
+    title: 'Founders',
     image: woman,
     description: 'A Chartered Manager and Business Administrator with CMI Level 7 Diploma Certification, driving business growth through strategic leadership and management expertise. Skilled graphics designer with proficiency in Adobe Creative Suite. Experienced primary educator with expertise in instructional design, visual learning materials, and child development. A versatile professional with a unique blend of management, creative, and educational skills, offering excellent problem-solving, project management, and communication abilities.',
   },
@@ -24,7 +24,7 @@ const teamMembers = [
     id: 3,
     name: '⁠TOPE ADEWALE ABIODUN',
     qualification: '(B.Ed, B.Sc Health Promotion and Education)',
-    title: 'Position',
+    title: 'Founders',
     image: man2,
     description: 'Results-driven Graphics Designer and Health Educator with vast experience. Skilled in Adobe Creative Suite and design principles, with a strong background in health education and promotion. Proven track record of delivering engaging visual communications and educational programs, with excellent communication and project management skills.',
   },
@@ -35,7 +35,7 @@ const Teams = () => {
     <section id='team'>
       <div className="py-10 bg-[#ccd5d4]">
         <div className="container mx-auto px-4">
-          <h2 className="text-lg md:text-2xl lg:text-3xl font-bold text-center mb-8 font-sans">Founders</h2>
+          <h2 className="text-lg md:text-2xl lg:text-3xl font-bold text-center mb-8 font-sans">Meet our Team</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {teamMembers.map((member) => (
               <TeamMemberCard key={member.id} member={member} />
@@ -61,7 +61,7 @@ const TeamMemberCard = ({ member }) => {
       <img
         src={member.image}
         alt={member.name}
-        className="w-32 h-32 rounded-full mb-4"
+        className="size-30 rounded-full mb-4"
       />
       <h3 className="text-xl font-semibold text-gray-100">{member.name}</h3>
       <h3 className="text-xs text-gray-100">{member.qualification}</h3>

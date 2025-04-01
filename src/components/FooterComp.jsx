@@ -3,9 +3,11 @@ import React from 'react';
 import VemreLogo from '../components/logo/vemre1.png';
 import Stripe from '../components/logo/stripe.jpeg';
 import Efcc from '../components/logo/efcc.jpg';
+import Lemfi from '../components/logo/lemfi.jpeg';
 import { FaGooglePlay } from "react-icons/fa6";
 import { FaApple } from "react-icons/fa";
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaLinkedin } from 'react-icons/fa';
+import { FaXTwitter } from "react-icons/fa6";
 
 const FooterComp = () => {
   return (
@@ -17,11 +19,12 @@ const FooterComp = () => {
             <img src={VemreLogo} alt="Vemre Logo" className='w-30 h-28 md:w-36 md:h-[140px] lg:ml-10' />
           </div> */}
           <div className='flex flex-col items-center md:items-start py-4 px-14 md:px-4 lg:px-16'>
-            <h1 className='text-center px-2 font-semibold pl-2 md:pr-10 py-2 text-lg md:text-xl lg:text-2xl'>Our Partners</h1>
+            <h1 className='text-center px-2 font-semibold pl-2 md:pr-10 md:px-6 lg:px-4 py-2 text-lg md:text-xl lg:text-2xl'>Our Partners</h1>
             <div className='flex flex-row justify-center md:justify-start'>
-              <img src={Stripe} alt="Stripe Logo" className='rounded-full mx-2 size-12 md:ml-2 lg:ml-4'/>
+              <img src={Stripe} alt="Stripe Logo" className='rounded-full mx-2 size-10 md:ml-2'/>
               
-               <img src={Efcc} alt="Efcc Logo" className='rounded-full mx-2 size-12' /> 
+               <img src={Lemfi} alt="Lemfi Logo" className='rounded-full mx-2 size-10' /> 
+               <img src={Efcc} alt="Efcc Logo" className='rounded-full mx-2 size-10' /> 
             </div>
           </div>
 
@@ -29,16 +32,16 @@ const FooterComp = () => {
       <h1 className="text-xl font-bold mb-4">Follow Us</h1>
       <div className="flex space-x-4">
         <a href="#" target="_blank" rel="noopener noreferrer">
-          <FaFacebook className="text-blue-600 hover:text-blue-800 transition duration-200 size-8 md:size-8"/>
+          <FaFacebook className="text-white hover:text-blue-800 transition duration-200 size-6 lg:size-8"/>
         </a>
         <a href="#" target="_blank" rel="noopener noreferrer">
-          <FaTwitter className="text-blue-400 hover:text-blue-600 transition duration-200 size-8 md:size-8" />
+          <FaXTwitter className="hover:text-blue-600 transition duration-200 size-6  lg:size-8" />
         </a>
         <a href="#" target="_blank" rel="noopener noreferrer">
-          <FaInstagram className="text-pink-500 hover:text-pink-700 transition duration-200 size-8 md:size-8" />
+          <FaInstagram className="text-pink-600 hover:text-pink-700 transition duration-200 size-6 lg:size-8" />
         </a>
         <a href="#" target="_blank" rel="noopener noreferrer">
-          <FaLinkedin className="text-blue-700 hover:text-blue-900 transition duration-200 size-8 md:size-8" />
+          <FaLinkedin className="text-blue-500 hover:text-blue-900 transition duration-200 size-6 lg:size-8" />
         </a>
       </div>
     </div>
