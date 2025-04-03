@@ -1,6 +1,5 @@
 // src/Footer.jsx
-import React from 'react';
-import VemreLogo from '../components/logo/vemre1.png';
+import React, { useState } from 'react';
 import Stripe from '../components/logo/stripe.jpeg';
 import Efcc from '../components/logo/efcc.jpg';
 import Lemfi from '../components/logo/lemfi.jpeg';
@@ -8,8 +7,16 @@ import { FaGooglePlay } from "react-icons/fa6";
 import { FaApple } from "react-icons/fa";
 import { FaFacebook, FaInstagram, FaLinkedin } from 'react-icons/fa';
 import { FaXTwitter } from "react-icons/fa6";
+import TermsConditions from '../components/TermsConditions';
 
-const FooterComp = () => {
+
+  const FooterComp = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const toggleModal = () => {
+      setIsModalOpen(!isModalOpen);
+    };
+
   return (
     <footer className="bg-[#0b573d] text-white">
       {/* First Row */}
@@ -47,7 +54,7 @@ const FooterComp = () => {
     </div>
 
 
-          <div className='md:pr-5 lg:mr-12 px-4 py-6 flex flex-col items-center md:flex md:flex-col'>
+          <div className='md:pr-5 lg:mr-12 px-4 py-2 flex flex-col items-center md:flex md:flex-col'>
             <h1 className='pb-0 text-sm pl-2'>Install Our App</h1>
             <div className='flex gap-2 justify-center md:justify-start'>
               <a href="#">
@@ -64,9 +71,14 @@ const FooterComp = () => {
           </div>
         </div>
       </div>
+      
+      
+      <div className="container flex flex-col justify-center mx-auto px-4 text-center"> 
 
-      {/* Third Row */}
-      <div className="container flex flex-col justify-center mx-auto px-4 text-center">
+      <div>
+          <button onClick={toggleModal} className="text-teal-100 underline cursor-pointer">Terms and Conditions</button>
+        </div>
+
         <div>
           <p className="text-[12px] md:text-[16px] py-4">&copy; {new Date().getFullYear()} Vemre. All rights reserved.</p>
         </div>
@@ -74,6 +86,7 @@ const FooterComp = () => {
           <p className="text-[10px] md:text-sm pb-4 border-t py-2">Designed & Developed by <a className='text-teal-300 underline font-bold font-font2 text-xs md:text-sm hover:text-teal-400' target='blank' href="https://wa.me/qr/CCIUARQOPG7QH1">Netly Tech Solutions</a></p>
         </div>
       </div>
+      <TermsConditions isOpen={isModalOpen} onClose={toggleModal} />
     </footer>
   );
 };
