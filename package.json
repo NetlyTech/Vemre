@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://netlytech.github.io/Vemre",
+  "homepage": "https://netlytech.github.io/Vemre/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
