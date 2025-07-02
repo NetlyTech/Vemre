@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import man1 from './pics/aremu.jpg';
-import man2 from './pics/tope.jpg';
-import woman from './pics/temidayo.jpg';
+import man2 from './pics/topenew.jpg';
+import woman from './pics/temidayonew.jpg';
 
 const teamMembers = [
   {
