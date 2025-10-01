@@ -31,7 +31,7 @@ const services = [
   },
   {
     id: 5,
-    title: "New service Here",
+    title: "Tech & Business Dev Consultancy",
     description: 'Enter details here for new services.',
     icon:<FaPeopleGroup /> ,
   },
