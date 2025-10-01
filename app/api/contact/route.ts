@@ -9,29 +9,55 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: Number(process.env.SMTP_PORT) || 465,
-      secure: true, 
-      auth: {
-        user: process.env.SMTP_USER, 
-        pass: process.env.SMTP_PASS, 
-      },
-    });
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: true, // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+
+    
+    // const transporter = nodemailer.createTransport({
+    //   host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    //   port: Number(process.env.SMTP_PORT) || 465,
+    //   secure: true, 
+    //   auth: {
+    //     user: process.env.SMTP_USER, 
+    //     pass: process.env.SMTP_PASS, 
+    //   },
+    // });
+
+    // const mailOptions = {
+    //   from: `"${name}" <${email}>`,
+    //   to: process.env.CONTACT_EMAIL, 
+    //   subject: `New Contact Message from ${name}`,
+    //   text: `
+    //     Name: ${name}
+    //     Email: ${email}
+    //     Phone: ${phone || 'N/A'}
+    //     Message:
+    //     ${message}
+    //   `,
+    // };
 
     const mailOptions = {
-      from: `"${name}" <${email}>`,
-      to: process.env.CONTACT_EMAIL, 
-      subject: `New Contact Message from ${name}`,
-      text: `
-        Name: ${name}
-        Email: ${email}
-        Phone: ${phone || 'N/A'}
-        Message:
-        ${message}
-      `,
-    };
+  from: `"${name}" <${process.env.SMTP_USER}>`,
+  replyTo: email,
+  to: process.env.CONTACT_EMAIL,
+  subject: `New Contact Message from ${name}`,
+  text: `
+    Name: ${name}
+    Email: ${email}
+    Phone: ${phone || 'N/A'}
+    Message:
+    ${message}
+  `,
+};
+
 
     await transporter.sendMail(mailOptions);
 
