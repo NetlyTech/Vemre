@@ -3,6 +3,7 @@ import { FaRegCreditCard } from "react-icons/fa";
 import { FaComputer } from "react-icons/fa6";
 import { GrConnect } from "react-icons/gr";
 import { FaPeopleGroup } from "react-icons/fa6";
+import { FaHeadset } from "react-icons/fa";
 
 const services = [
   {
@@ -32,8 +33,8 @@ const services = [
   {
     id: 5,
     title: "Tech & Business Dev Consultancy",
-    description: 'Enter details here for new services.',
-    icon:<FaPeopleGroup /> ,
+    description: 'Tailored business needs with technical excution and business acumen.',
+    icon: <FaHeadset /> ,
   },
 ];
 
@@ -43,7 +44,7 @@ const OurService = () => {
      <div className="py-6 lg:pb-16 bg-gray-100">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-8 text-black ">Our Services</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {services.map((service) => (
             <div
               key={service.id}
