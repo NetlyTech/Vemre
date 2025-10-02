@@ -4,6 +4,7 @@ import { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import Address from '@/components/components/Address';
 import Map from '@/components/components/Map';
+import ContactHeader from '@/components/components/ContactHeader';
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -46,13 +47,16 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="bg-[#ccd5d4] mx-auto p-6">
+    
+    <div className="bg-[#ccd5d4] mx-auto">
       <Toaster position="top-right" />
+      
       <div className="mb-8">
+        <ContactHeader />
         <Address />
       </div>
       <h1 className="text-green-800 text-center text-3xl font-bold mb-6">Contact Us</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4 lg:px-6">
         <input
           type="text"
           name="name"

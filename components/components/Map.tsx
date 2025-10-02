@@ -15,7 +15,7 @@ const Map: React.FC<MapProps> = ({
   title = "Company Location Map",
 }) => {
   return (
-    <div className="w-full py-10">
+    <div className="w-full py-10 px-6">
       <h2 className="pt-6 text-center text-green-800 text-2xl md:3xl font-bold mb-4">Find us via the Map</h2>
       <iframe
         src={src}
