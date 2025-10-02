@@ -1,8 +1,11 @@
+
+
 // 'use client';
 
 // import { useState } from 'react';
 // import toast, { Toaster } from 'react-hot-toast';
-
+// import Address from '@/components/components/Address';
+// import Map from '@/components/components/Map';
 
 // export default function ContactPage() {
 //   const [form, setForm] = useState({
@@ -41,12 +44,16 @@
 //       setLoading(false);
 //     }
 //   };
-  
 
 //   return (
-//     <div className="max-w-xl mx-auto p-6">
+    
+//     <div className="bg-[#ccd5d4] mx-auto p-6">
 //       <Toaster position="top-right" />
-//       <h1 className="text-3xl font-bold mb-6">Contact Us</h1>
+//       <div className="mb-8">
+        
+//         <Address />
+//       </div>
+//       <h1 className="text-green-800 text-center text-3xl font-bold mb-6">Contact Us</h1>
 //       <form onSubmit={handleSubmit} className="space-y-4">
 //         <input
 //           type="text"
@@ -91,9 +98,16 @@
 //           {loading ? 'Sending...' : 'Send'}
 //         </button>
 //       </form>
+
+//       {/* Add the Address component below the form */}
+//       <Map />
+//       <div className="mt-12">
+        
+//       </div>
 //     </div>
 //   );
 // }
+
 
 'use client';
 
@@ -127,11 +141,13 @@ export default function ContactPage() {
         body: JSON.stringify(form),
       });
 
+      const data = await res.json();  // Parse response body for errors
+
       if (res.ok) {
         toast.success('Message sent successfully!');
         setForm({ name: '', email: '', phone: '', message: '' });
       } else {
-        toast.error('Failed to send message. Please try again.');
+        toast.error(data.error || 'Failed to send message. Please try again.');
       }
     } catch (error) {
       toast.error('An error occurred. Please try again.');
@@ -141,11 +157,9 @@ export default function ContactPage() {
   };
 
   return (
-    
     <div className="bg-[#ccd5d4] mx-auto p-6">
       <Toaster position="top-right" />
       <div className="mb-8">
-        
         <Address />
       </div>
       <h1 className="text-green-800 text-center text-3xl font-bold mb-6">Contact Us</h1>
@@ -194,7 +208,6 @@ export default function ContactPage() {
         </button>
       </form>
 
-      {/* Add the Address component below the form */}
       <Map />
       <div className="mt-12">
         
@@ -202,4 +215,5 @@ export default function ContactPage() {
     </div>
   );
 }
+
 
