@@ -10,8 +10,6 @@ import { usePathname , useRouter} from 'next/navigation';
 const navRoute = [
     { id: 2, text: 'Services', sectionId: 'service' },
     { id: 3, text: 'About', sectionId: 'about' },
-    // { id: 4, text: 'Team', sectionId: 'team' },
-    // { id: 5, text: 'Contact', sectionId: 'contact' },
     { id: 5, text: 'Contact', link: '/contact' },
   ];
 
@@ -21,7 +19,7 @@ const Navbar = () => {
   const [navItems, setNavItems] = useState(navRoute);
    const pathname = usePathname();
 
-   const publicRoutes = ["/"]
+   const publicRoutes = ["/", "/contact"]
 
    const isPublicRoute = publicRoutes.some((route) => pathname === route)
   
@@ -156,3 +154,5 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+
