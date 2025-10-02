@@ -10,7 +10,7 @@ import React from 'react';
        
        <div>
          <h4 className="text-green-800 text-center text-2xl md:text-4xl font-extrabold mb-2">Get In Touch</h4>
-        <h1 className="text-center text-[16px] md:text-[20px] lg:text-[20px] font-bold mb-4">
+        <h1 className="text-center text-[12px] md:text-[16px] lg:text-[20px] font-bold mb-4">
           Visit Us on Site or Contact Us Today!
         </h1>
        </div>
