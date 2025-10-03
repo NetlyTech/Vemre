@@ -5,6 +5,7 @@ import { AiOutlineClose, AiOutlineMenu } from 'react-icons/ai';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+////
 
 const navRoute = [
   { id: 1, text: 'Home', link: '/' },
