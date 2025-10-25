@@ -14,6 +14,7 @@ const AccordionItem = ({ title, content, isOpen, onToggle }:
 }
 ) => {
   return (
+    <section id='faq'>
     <div className="border-2 border-green-800 mx-4 md:mx-12 lg:border-3 rounded-2xl my-3">
       <div
         className="flex justify-between items-center p-4 cursor-pointer transition duration-300 ease-in-out"
@@ -25,6 +26,7 @@ const AccordionItem = ({ title, content, isOpen, onToggle }:
       </div>
       {isOpen && <div className="px-6 md:px-4 pb-4 lg:py-4 lg:px-8 text-gray-700">{content}</div>}
     </div>
+    </section>
   );
 };
 
