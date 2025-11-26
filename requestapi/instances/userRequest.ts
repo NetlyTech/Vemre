@@ -28,6 +28,7 @@ export type ActivityProps = {
 
 
 
+const allkycs = "/api/user/kycs";
 const alltransactions = "/api/user/transactions";
 const sendmoney = "/api/user/sendmoney";
 
@@ -42,6 +43,15 @@ class UserServices {
     
     async alltransactions(): Promise<{data: ActivityProps[]}> {
         const response = await rootAxiosInstance.get(alltransactions);
+        return response.data
+    }
+    /**
+     * To get all kycs
+     * @returns
+     */
+    
+    async allkycs(): Promise<{data: []}> {
+        const response = await rootAxiosInstance.get(allkycs);
         return response.data
     }
 

@@ -79,6 +79,20 @@ export default function AllTransactions() {
     })
     .map(item => ({
       id: item._id,
+
+ ref: item._id?.slice(0,6),
+ customerName: item.senderName,
+    freelancer: item.user?.fullname,
+      debit: item.type  == "Withdraw" ? item.amount : "-",
+    credit: item.type  == "Received" ? item.amount : "-",
+
+     fee: item.amount ? item.amount * 0.2 : 0,
+    net: item.amount ? item.amount * 0.002 - item.amount : 0,
+
+     account_number: item.type  == "Withdraw" ? item.account_number : "-",
+       bank_name: item.type  == "Withdraw" ? item.bank_name : "-",
+        time: dayjs(item.updatedAt).format("hh:mm A"),
+
       description: item.description,
       date: dayjs(item.updatedAt).format("MMM D, YYYY"),
       amount: item.amount,
@@ -211,17 +225,73 @@ export default function AllTransactions() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="grid grid-cols-5 gap-5 font-medium text-sm text-gray-500">
-              <div>Transaction</div>
-              <div>Date</div>
-              <div>Amount</div>
-              <div>Status</div>
-              <div></div>
+            <div className="grid grid-cols-11 gap-5 font-medium text-sm text-gray-500">
+               <div>DATEE & TIME</div>
+                <div>FREELANCER</div>
+                <div>REFERENCE & CUSTOMER</div>
+                <div>DEBIT</div>
+                <div>CREDIT</div>
+
+                <div>PROCESSING <br /> FEE (20%)</div>
+                <div>NET <br /> AMOUNT</div>
+                <div>BANK</div>
+                <div>ACCOUNT <br />NUMBER</div>
+                <div>STATUS</div>
+                <div>ACTIONS</div>
             </div>
             <div className="divide-y">
               {transactions.map((transaction) => (
-                <div key={transaction.id} className="grid grid-cols-5 gap-5 py-3 items-center">
-                  <div className="font-medium truncate">{transaction.description}</div>
+                <div key={transaction.id} className="grid grid-cols-11 gap-5 py-3 items-center">
+
+                   <div>
+                                    <div className="text-gray-500 text-sm">{transaction.date}</div>
+                                    <div className="text-gray-500 text-sm">{transaction.time}</div>
+                                    </div>
+                  
+                                      <div className="text-gray-500 text-sm">{transaction.freelancer}</div>
+                                    
+                                      <div>
+                                      <div className="text-gray-500 text-sm">{transaction.ref}</div>
+                                      <div className="text-gray-500 text-sm">{transaction.customerName}</div>
+                                      </div>
+                  
+                                      <div>
+                                       { transaction.debit == "-" ?
+                                      <div className="text-gray-500 text-sm">{transaction.debit}</div>
+                                      :
+                                      <div className={transaction.amountClass}>{formatInky(transaction.debit?.toString()!)}</div>
+                                      }
+                                      </div>
+                  
+                                      <div>
+                                       { transaction.credit == "-" ?
+                                      <div className="text-gray-500 text-sm">{transaction.credit}</div>
+                                      :
+                                      <div className={transaction.amountClass}>{formatInky(transaction.credit?.toString()!)}</div>
+                                      }
+                                      </div>
+                  
+                                       <div className={transaction.amountClass}>{formatInky(transaction.fee?.toString()!)}</div>
+                                       <div className={transaction.amountClass}>{formatInky(transaction.net?.toString()!)}</div>
+                  
+                                          <div className="text-gray-500 text-sm">{transaction.bank_name}</div>
+                                          <div className="text-gray-500 text-sm">{transaction.account_number}</div>
+                  
+                  
+                                      
+                                      
+                                      <div>{getStatusBadge(transaction.status)}</div>
+                                      <div className="text-right">
+                                        <button
+                                          className="text-sm text-primary hover:underline"
+                                          onClick={() => openTransactionDetails(transaction)}
+                                        >
+                                          Details
+                                        </button>
+                                      </div>
+
+
+                  {/* <div className="font-medium truncate">{transaction.description}</div>
                   <div className="text-gray-500 text-sm">{transaction.date}</div>
                    <div className={transaction.amountClass}>{formatInky(transaction.amount?.toString()!)}</div>
                   <div>{getStatusBadge(transaction.status)}</div>
@@ -232,7 +302,9 @@ export default function AllTransactions() {
                     >
                       Details
                     </button>
-                  </div>
+                  </div> */}
+
+
                 </div>
               ))}
             </div>

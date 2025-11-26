@@ -3,7 +3,7 @@ import UserServices from "../instances/userRequest";
 // import { Tcreate_transactionSchema } from "constants/transaction.type";
 
 
-const {  alltransactions, createuserwithdrawl} = new UserServices()
+const {  alltransactions, createuserwithdrawl, allkycs} = new UserServices()
 
 class UserQueries {
 
@@ -11,6 +11,10 @@ class UserQueries {
   
     useAlTransactions = () => {
         return useQuery({queryKey:["alltransactions"], queryFn: alltransactions });
+    };
+
+    useAllKycs = () => {
+        return useQuery({queryKey:["kycs"], queryFn: allkycs });
     };
 
     setCreateuserWithdrawal = () => {
