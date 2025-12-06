@@ -12,9 +12,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Download } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { autoTable } from 'jspdf-autotable'
 import UserQueries from "@/requestapi/queries/userQueries"
 import { ActivityProps } from "@/requestapi/instances/userRequest"
 import { formatInky } from "@/lib/utils"
@@ -23,8 +21,13 @@ import { getError } from "@/lib/requestError"
 import OverlayLoader from "@/components/OverLayLoader"
 import ScrollToTop from "@/components/scrollToTop"
 
+
+import DownloadMenu from "@/components/DownloadMenu";
+import { mapTransactionRows } from "@/lib/mapTransactionRows";
+
 // Define transaction type
 type Transaction = {
+  _id: string,
   id?: string
   description?: string
   date?: string
@@ -94,6 +97,7 @@ export default function Dashboard() {
   const transactions = data?.data.filter(item => item.type == "Received" && item.isPending == false && item.isVemreCharge == false)
     .map(item => ({
       id: item._id,
+      _id: item._id,
 
       customerName: item.senderName,
       freelancer: item.user?.fullname,
@@ -134,6 +138,7 @@ export default function Dashboard() {
   const withdrawRequest = data?.data.filter(item => item.type == "Withdraw" && item.isPending == false && item.isVemreCharge == false)
     .map(item => ({
       id: item._id,
+       _id: item._id,
 
       customerName: item.senderName,
       freelancer: item.user?.fullname,
@@ -203,7 +208,7 @@ export default function Dashboard() {
 
   const pendingtransactions = data?.data.filter(item => item.type == "Received" && item.isPending == true && item.isVemreCharge == false)
     .map(item => ({
-
+ _id: item._id,
       id: item._id,
       ref: item._id?.slice(0, 6),
       customerName: item.senderName,
@@ -247,7 +252,7 @@ export default function Dashboard() {
 
   const pendingwithdrawtransactions = data?.data.filter(item => item.type == "Withdraw" && item.isPending == true && item.isVemreCharge == false)
     .map(item => ({
-
+ _id: item._id,
       id: item._id,
       ref: item._id?.slice(0, 6),
       customerName: item.senderName,
@@ -307,167 +312,6 @@ export default function Dashboard() {
   }
 
 
-  // Function to download transactions as PDF
-  const downloadTransactionsPDF = ({ title, filename, transactionType }: { title: string, filename: string, transactionType: "recent" | "pending" | "withdrawal" | "pendingwithdraw" }) => {
-    // We'll use dynamic import to load jsPDF only in the browser
-    import("jspdf")
-      .then(({ default: jsPDF }) => {
-
-        import("jspdf-autotable").then(() => {
-
-          const doc = new jsPDF()
-
-          // Add title
-          doc.setFontSize(18)
-          doc.text(title, 14, 22)
-          // doc.text("Recent Transactions", 14, 22)
-          doc.setFontSize(11)
-          doc.text(`Generated on: ${new Date().toString()}`, 14, 30);
-
-
-          // Define the columns
-          const columns = [
-            { header: "Date", dataKey: "date" },
-            { header: "Customer", dataKey: "customer" },
-            { header: "Freelancer", dataKey: "freelancer" },
-            { header: "Debit", dataKey: "debit" },
-            { header: "Credit", dataKey: "credit" },
-            { header: "Fee", dataKey: "fee" },
-            { header: "Net", dataKey: "net" },
-            { header: "Bank", dataKey: "bank_name" },
-            { header: "Account Number", dataKey: "account_number" },
-            { header: "Status", dataKey: "status" },
-            { header: "Reference", dataKey: "ref" }
-          ]
-
-          let data: {
-            date: string;
-            customerName: string;
-            freelancer: string;
-            debit: string | number;
-            credit: string | number;
-            fee: number;
-            net: number;
-            bank_name: string;
-            account_number: string;
-            status: string;
-            ref: string;
-          }[] = [];
-
-          if (transactionType == "recent") {
-            // Prepare the data
-            data = transactions.map(({ date, customerName, freelancer, debit, credit, fee, net, account_number, bank_name, status, ref, }) => {
-              return {
-                date: date!,
-                customerName: customerName!,
-                freelancer: freelancer!,
-                debit: debit!,
-                credit: credit!,
-                fee: fee!,
-                net: net!,
-                bank_name: bank_name!,
-                account_number: account_number!,
-                status: status!,
-                ref: ref!,
-              }
-            });
-          }
-
-
-          if (transactionType == "withdrawal") {
-            // Prepare the data
-            data = withdrawRequest.map(({ date, customerName, freelancer, debit, credit, fee, net, account_number, bank_name, status, ref, }) => {
-              return {
-                date: date!,
-                customerName: customerName!,
-                freelancer: freelancer!,
-                debit: debit!,
-                credit: credit!,
-                fee: fee!,
-                net: net!,
-                bank_name: bank_name!,
-                account_number: account_number!,
-                status: status!,
-                ref: ref!,
-              }
-            });
-          }
-
-          if (transactionType == "pending") {
-            // Prepare the data
-            data = pendingtransactions.map(({ date, customerName, freelancer, debit, credit, fee, net, account_number, bank_name, status, ref, }) => {
-              return {
-                date: date!,
-                customerName: customerName!,
-                freelancer: freelancer!,
-                debit: debit!,
-                credit: credit!,
-                fee: fee!,
-                net: net!,
-                bank_name: bank_name!,
-                account_number: account_number!,
-                status: status!,
-                ref: ref!,
-              }
-            });
-          }
-
-
-          if (transactionType == "pendingwithdraw") {
-            // Prepare the data
-            data = pendingwithdrawtransactions.map(({ date, customerName, freelancer, debit, credit, fee, net, account_number, bank_name, status, ref, }) => {
-              return {
-                date: date!,
-                customerName: customerName!,
-                freelancer: freelancer!,
-                debit: debit!,
-                credit: credit!,
-                fee: fee!,
-                net: net!,
-                bank_name: bank_name!,
-                account_number: account_number!,
-                status: status!,
-                ref: ref!,
-              }
-            });
-          }
-
-
-          // Create the table
-          autoTable(doc, {
-            head: [columns.map((column) => column.header)],
-            body: data.map((item) => columns.map((column) => item[column.dataKey as keyof typeof item])),
-            startY: 40,
-            theme: "grid",
-            styles: {
-              fontSize: 10,
-              cellPadding: 3,
-            },
-            headStyles: {
-              fillColor: [66, 66, 66],
-              textColor: [255, 255, 255],
-              fontStyle: "bold",
-            },
-            alternateRowStyles: {
-              fillColor: [245, 245, 245],
-            },
-          })
-
-          // Save the PDF
-          doc.save(`${filename}.pdf`)
-          // doc.save("recent-transactions.pdf")
-        })
-      })
-      .catch((error) => {
-        // console.error("Error generating PDF:", error)
-        alert("Failed to generate PDF. Please try again.")
-      })
-
-
-
-
-  }
-
 
 
   return (
@@ -476,8 +320,63 @@ export default function Dashboard() {
       {(!data?.data || isPending) && <OverlayLoader />}
 
 
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6">Transaction Activities</h1>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="bg-white p-6 rounded-lg shadow">
+
+           <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">All Transactions</span>
+              <span className="font-medium">{formatInky(transacts.alltransaction?.toString()!)}</span>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Pending Withdraw</span>
+              <span className="font-medium text-yellow-600">{formatInky(transacts.PendingWithdraw?.toString()!)}</span>
+            </div>
+
+          </div>
+        
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow">
+            <div className="space-y-3">
+
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Pending Credit</span>
+              <span className="font-medium text-yellow-600">{formatInky(transacts.PendingReceive?.toString()!)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Withdrawn</span>
+              <span className="font-medium text-red-600">{formatInky(transacts.Withdraw?.toString()!)}</span>
+            </div>
+
+          </div>
+
+
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow">
+          
+            <div className="space-y-3">
+         
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Received</span>
+              <span className="font-medium text-green-600">{formatInky(transacts.Received?.toString()!)}</span>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Revenue</span>
+              <span className="font-medium text-green-600">{formatInky(transacts.revenue?.toString()!)}</span>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+
+
+
+      {/* <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <div className="bg-white p-6 rounded-lg shadow">
           <h2 className="text-xl font-semibold mb-4">Welcome</h2>
           <p className="text-gray-600">You have successfully logged in to your account.</p>
@@ -518,12 +417,12 @@ export default function Dashboard() {
             <button onClick={handleLogout} className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">
               Logout
             </button>
-            <Link href="/dashboard/users" className="text-sm font-medium text-primary  flex items-center">
+            <Link href="/users" className="text-sm font-medium text-primary  flex items-center">
               <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">Users</button>
             </Link>
           </div>
         </div>
-      </div>
+      </div> */}
 
 
 
@@ -533,14 +432,13 @@ export default function Dashboard() {
           <CardHeader className="flex flex-row items-center justify-between gap-3">
             <CardTitle>Recent Transactions</CardTitle>
             <div className="flex gap-2 flex-wrap justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => downloadTransactionsPDF({ transactionType: "recent", title: "Recent Transactions", filename: "recent-transactions" })}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download PDF
-              </Button>
+
+              <DownloadMenu
+                title="Recent Transactions"
+                filename="recent-transactions"
+                rows={mapTransactionRows(transactions)}
+              />
+
 
               <Link
                 href="/transactions?type=recent"
@@ -654,14 +552,14 @@ export default function Dashboard() {
           <CardHeader className="flex flex-row items-center justify-between gap-3">
             <CardTitle>Pending Transactions</CardTitle>
             <div className="flex gap-2 flex-wrap justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => downloadTransactionsPDF({ transactionType: "pending", title: "Pending Transactions", filename: "pending-transactions" })}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download PDF
-              </Button>
+
+
+              <DownloadMenu
+                title="Pending Transactions"
+                filename="pending-transactions"
+                rows={mapTransactionRows(pendingtransactions)}
+              />
+
 
               <Link
                 href="/transactions?type=pending"
@@ -776,14 +674,13 @@ export default function Dashboard() {
           <CardHeader className="flex flex-row items-center justify-between gap-3">
             <CardTitle>Withdraw Requests</CardTitle>
             <div className="flex gap-2 flex-wrap justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => downloadTransactionsPDF({ transactionType: "pendingwithdraw", title: "Pending Withdrawal", filename: "pending-withdrawal" })}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download PDF
-              </Button>
+
+
+              <DownloadMenu
+                title="Withdraw Requests"
+                filename="withdraw-requests"
+                rows={mapTransactionRows(withdrawRequest)}
+              />
 
               <Link
                 href="/transactions?type=pendingwithdraw"
@@ -896,20 +793,13 @@ export default function Dashboard() {
           <CardHeader className="flex flex-row items-center justify-between gap-3">
             <CardTitle>Pending Withdrawal</CardTitle>
             <div className="flex gap-2 flex-wrap justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  downloadTransactionsPDF({
-                    transactionType: "pendingwithdraw",
-                    title: "Pending Withdrawal",
-                    filename: "pending-withdrawal",
-                  })
-                }
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download PDF
-              </Button>
+
+
+              <DownloadMenu
+                title="Pending Withdrawal"
+                filename="pending-withdrawal"
+                rows={mapTransactionRows(pendingwithdrawtransactions)}
+              />
 
               <Link
                 href="/transactions?type=pending"
@@ -1016,6 +906,8 @@ export default function Dashboard() {
       </div>
 
 
+
+
       {/* Transaction Details Dialog */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="sm:max-w-md max-h-[50vh] overflow-auto">
@@ -1113,4 +1005,14 @@ export default function Dashboard() {
   )
 }
 
+
+
+
+
+
+{/* <DownloadMenu
+  title="Recent Transactions"
+  filename="recent-transactions"
+  rows={mapTransactionRows(transactions)}
+/> */}
 

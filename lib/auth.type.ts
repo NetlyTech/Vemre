@@ -65,6 +65,7 @@ export const userSchema = z.object({
    verify_account: z.boolean()
   }),
   token: z.string(),
+   route: z.enum(["users",'dashboard']), 
 });
 
 

@@ -15,7 +15,7 @@ import Link from 'next/link';
   const FooterComp = () => {
 
   return (
-    <footer className="bg-[#0b573d] text-white">
+    <footer className="bg-[#0b573d] text-white mt-auto">
       {/* First Row */}
       <div className="container flex flex-col items-center">
         <div className="flex flex-col md:flex-row justify-between items-center w-full mb-4">

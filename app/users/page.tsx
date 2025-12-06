@@ -1,34 +1,38 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
+import dayjs from "@/lib/dayjs"
+import UserQueries from "@/requestapi/queries/userQueries"
+import { getError } from "@/lib/requestError";
+import OverlayLoader from "@/components/OverLayLoader";
+const {useAllKycs, setKycStatus} = new UserQueries();
 
 export default function UsersPage() {
   // Example users — replace with API/DB data
-  const allUsers = [
-    {
-      id: "1",
-      name: "John Doe",
-      email: "john@vemre.com",
-      phone: "+1 555 123 456",
-      avatar: "https://i.pravatar.cc/150?img=3",
-      location: "New York, USA",
-      lastActive: "2025-01-05 14:33",
-      documentUrl: "/documents/john.pdf",
-    },
-    {
-      id: "2",
-      name: "Sarah Miller",
-      email: "sarah@vemre.com",
-      phone: "+1 444 222 333",
-      avatar: "https://i.pravatar.cc/150?img=5",
-      location: "Berlin, Germany",
-      lastActive: "2025-01-10 09:20",
-      documentUrl: "/documents/sarah.pdf",
-    },
-  ];
-
   const [query, setQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<any>(null);
+   const {data} = useAllKycs();
+
+   const {mutateAsync, isPending} = setKycStatus()
+
+
+   const allUsers = data?.data.map(v => {
+    
+    return   {
+      id: v._id,
+      name: v.user.fullname,
+      email: v.user.email,
+      phone: v.user.phone_number,
+      avatar: v.user.avatar,
+      location: `${v.user.location.city}, ${v.user.location.region}`,
+      lastActive: dayjs(v.user.lastActive ).format("MMM D, YYYY, hh:mm A"),
+      documentUrl: v.avatar,
+      admin_verify_status: v.admin_verify_status,
+    }
+   })  || []
+
+
+
 
   // Filter users
   const filtered = allUsers.filter(u =>
@@ -37,8 +41,26 @@ export default function UsersPage() {
       .includes(query.toLowerCase())
   );
 
+
+
+  const handleStatusApproval = async(admin_verify_status: "approved" | "rejected") => {
+
+    try {
+
+
+      console.log({admin_verify_status, id: selectedUser.id})
+      
+     await mutateAsync({admin_verify_status, id: selectedUser.id});
+    } catch (error) {
+       const Error = getError(error);
+        window.alert(Error)
+    }
+  }
+
   return (
     <div className="max-w-5xl mx-auto p-8">
+
+      {(!data?.data || isPending) && <OverlayLoader />}
       <h1 className="text-3xl font-semibold mb-6">User Management</h1>
 
       {/* Search Bar */}
@@ -76,10 +98,33 @@ export default function UsersPage() {
                 height={40}
                 className="rounded-full"
               />
-              <div>
-                <p className="font-medium">{user.name}</p>
-                <p className="text-sm text-gray-600">{user.email}</p>
-              </div>
+
+
+              <div className="flex-1">
+  <p className="font-medium">{user.name}</p>
+
+  <p className="text-sm text-gray-600 truncate max-w-[140px] overflow-hidden text-ellipsis">
+    {user.email}
+  </p>
+
+  <span
+    className={`
+      inline-block mt-1 px-2 py-0.5 text-xs font-semibold rounded
+      ${
+        user.admin_verify_status === "approved"
+          ? "bg-green-100 text-green-800"
+          : user.admin_verify_status === "rejected"
+          ? "bg-red-100 text-red-800"
+          : "bg-yellow-100 text-yellow-800"
+      }
+    `}
+  >
+    {user.admin_verify_status}
+  </span>
+</div>
+
+
+
             </div>
           ))}
         </div>
@@ -125,14 +170,15 @@ export default function UsersPage() {
               </div>
 
               {/* Approve / Reject Buttons */}
-              <div className="mt-6 flex gap-4">
-                <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+              {selectedUser.admin_verify_status === "pending" && <div className="mt-6 flex gap-4">
+                <button onClick={() => handleStatusApproval("approved") } className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
                   Approve
                 </button>
-                <button className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                <button onClick={() => handleStatusApproval("rejected") } className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
                   Reject
                 </button>
-              </div>
+              </div>}
+              
             </div>
           ) : (
             <div className="p-6 text-gray-500 border rounded-lg bg-white shadow">

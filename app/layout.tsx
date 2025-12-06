@@ -37,7 +37,9 @@ export default function RootLayout({
       <body>
         <QueryClientWrapper>
           <Navbar />
+          <main className="min-h-[70vh]">
           {children}
+          </main>
           <FooterComp />
         </QueryClientWrapper>
       </body>

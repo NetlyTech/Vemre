@@ -2,9 +2,7 @@
 
 import type React from "react"
 
-// import { useState } from "react"
 import { useRouter } from "next/navigation"
-// import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -48,11 +46,14 @@ export default function LoginPage() {
       
      Promise.resolve( 
       localStorage.setItem("accessToken", data.token)
-     ).then(() => {
-     
-     document.cookie = "auth=authenticated; path=/; max-age=86400"
-     }).then(() => {
-      router.push("/dashboard")
+    ).then(() => {
+      
+      document.cookie = "auth=authenticated; path=/; max-age=86400"
+    }).then(() => {
+      localStorage.setItem("route", data.route)
+      
+      router.push(`/${data.route}`)
+
      })
 
     } catch (error) {

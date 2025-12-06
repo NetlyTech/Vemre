@@ -3,7 +3,7 @@ import UserServices from "../instances/userRequest";
 // import { Tcreate_transactionSchema } from "constants/transaction.type";
 
 
-const {  alltransactions, createuserwithdrawl, allkycs} = new UserServices()
+const {  alltransactions, createuserwithdrawl, allkycs, kycStatus} = new UserServices()
 
 class UserQueries {
 
@@ -16,6 +16,20 @@ class UserQueries {
     useAllKycs = () => {
         return useQuery({queryKey:["kycs"], queryFn: allkycs });
     };
+
+    setKycStatus = () => {
+      const queryClient = useQueryClient();
+
+      return  useMutation({
+      mutationFn: (data: {id: string, admin_verify_status: "approved" |  "rejected"}) => {
+        return kycStatus(data)
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['kycs'] });
+      }
+    });
+    }
+
 
     setCreateuserWithdrawal = () => {
       const queryClient = useQueryClient();
