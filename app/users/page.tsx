@@ -23,7 +23,7 @@ console.log(data)
       name: v.user.fullname,
       email: v.user.email,
       phone: v.user.phone_number,
-      avatar: v.user.avatar || "https://avatar.iran.liara.run/public",
+      avatar: v.user.avatar || `https://avatar.iran.liara.run/username?username=${v.firstname}+${v.lastname}`,
       location: v.user.location,
       lastActive: dayjs(v.user.lastActive ).format("MMM D, YYYY, hh:mm A"),
       documentUrl: v.avatar,
