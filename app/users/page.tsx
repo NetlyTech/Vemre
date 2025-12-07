@@ -14,7 +14,7 @@ export default function UsersPage() {
    const {data} = useAllKycs();
 
    const {mutateAsync, isPending} = setKycStatus()
-
+console.log(data)
 
    const allUsers = data?.data.map(v => {
     
@@ -23,8 +23,8 @@ export default function UsersPage() {
       name: v.user.fullname,
       email: v.user.email,
       phone: v.user.phone_number,
-      avatar: v.user.avatar,
-      location: `${v.user.location.city}, ${v.user.location.region}`,
+      avatar: v.user.avatar || "https://avatar.iran.liara.run/public",
+      location: v.user.location,
       lastActive: dayjs(v.user.lastActive ).format("MMM D, YYYY, hh:mm A"),
       documentUrl: v.avatar,
       admin_verify_status: v.admin_verify_status,
@@ -47,8 +47,6 @@ export default function UsersPage() {
 
     try {
 
-
-      console.log({admin_verify_status, id: selectedUser.id})
       
      await mutateAsync({admin_verify_status, id: selectedUser.id});
     } catch (error) {
@@ -152,8 +150,13 @@ export default function UsersPage() {
 
               <div className="mt-6 space-y-2 text-gray-800">
                 <p>
-                  <strong>Location:</strong> {selectedUser.location}
+                  <strong>Location:</strong> {selectedUser.location.formattedAddress}, {selectedUser.location.region} {selectedUser.location.country}
                 </p>
+                <p>
+                  <strong>Postal Code:</strong> {selectedUser.location.postalCode}
+                </p>
+
+
                 <p>
                   <strong>Last Active:</strong> {selectedUser.lastActive}
                 </p>

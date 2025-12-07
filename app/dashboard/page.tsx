@@ -319,9 +319,25 @@ export default function Dashboard() {
 
       {(!data?.data || isPending) && <OverlayLoader />}
 
+      
+
 
       <h1 className="text-3xl font-bold mb-6">Transaction Activities</h1>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+
+         <div className="bg-white p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+          <div className="space-y-2">
+            {/* <button onClick={handleLogout} className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">
+              Logout
+            </button> */}
+            <Link href="/users" className="text-sm font-medium text-primary  flex items-center">
+              <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">Users</button>
+            </Link>
+          </div>
+        </div>
+
+
         <div className="bg-white p-6 rounded-lg shadow">
 
            <div className="space-y-3">
@@ -372,6 +388,8 @@ export default function Dashboard() {
 
           </div>
         </div>
+
+        
       </div>
 
 
