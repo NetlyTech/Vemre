@@ -14,7 +14,6 @@ export default function UsersPage() {
    const {data} = useAllKycs();
 
    const {mutateAsync, isPending} = setKycStatus()
-console.log(data)
 
    const allUsers = data?.data.map(v => {
     
