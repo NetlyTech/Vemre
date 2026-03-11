@@ -2,7 +2,7 @@
 import { TemailSchema, TloginSchema, TpasswordSchema } from "@/lib/auth.type";
 import rootAxiosInstance from "../axiosinstance";
 
-const login = "/api/auth/adminlogin";
+const login = "/api/admin/login";
 const forgetPassword = "/api/auth/forgetPassword";
 const changepassword = "/api/auth/changepassword";
 

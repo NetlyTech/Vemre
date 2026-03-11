@@ -9,10 +9,18 @@ export type ActivityProps = {
   description?: string;
   transactionReference?: string;
   senderName?: string;
+  senderEmail?: string;
   amount?: number;
+  convertedAmount?: number;
+  currency?: string;
+  fxRate?: number;
+  baseCurrency?: string;
+  targetCurrency?: string;
+  paymentoption?: string;
   category?: string;
   servicelink?: string
   updatedAt?:  string,
+  createdAt?: string,
   header?: string,
   recipientName?: string;
   account_number?: string;
@@ -21,8 +29,13 @@ export type ActivityProps = {
     fullname: string
     email: string
     phone_number: string
+    bank_account?: {
+      accountNumber: string
+      bankName: string
+      bankCode: string
+      accountName: string
+    }
   }
-  
 }
 
 
@@ -89,7 +102,7 @@ export interface UserLocation {
 
 
 
-const kycstatue = "/api/user/kycstatue";
+const kycstatue = "/api/admin/kycstatue";
 const allkycs = "/api/user/kycs";
 const alltransactions = "/api/user/transactions";
 const sendmoney = "/api/user/sendmoney";
@@ -121,8 +134,8 @@ class UserServices {
      * @returns
      */
     
-    async kycStatus({id, admin_verify_status}: {id: string, admin_verify_status: "approved" |  "rejected"}) {
-        const response = await rootAxiosInstance.patch(`${kycstatue}/${id}`, {admin_verify_status});
+    async kycStatus({id, admin_verify_status, reason = ""}: {id: string, admin_verify_status: "approved" | "rejected", reason?: string}) {
+        const response = await rootAxiosInstance.patch(`${kycstatue}/${id}`, {admin_verify_status, reason});
         return response.data
     }
 
