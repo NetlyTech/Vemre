@@ -21,7 +21,7 @@ class UserQueries {
       const queryClient = useQueryClient();
 
       return  useMutation({
-      mutationFn: (data: {id: string, admin_verify_status: "approved" |  "rejected"}) => {
+      mutationFn: (data: {id: string, admin_verify_status: "approved" | "rejected", reason?: string}) => {
         return kycStatus(data)
       },
       onSuccess: () => {
