@@ -137,11 +137,11 @@ export default function AllTransactions() {
     .filter(t => (statusFilter ? t.status === statusFilter : true))
     .filter(t => (typeFilter ? t.type === typeFilter : true))
 
-  // Pending withdrawals for bulk payout banner
+  // Completed received payments ready for disbursement (excludes platform charges)
   const allRawData = data?.data ?? []
-  const pendingWithdrawals = allRawData.filter(t => t.type === "Withdraw" && t.isPending === true)
-  const pendingCount = pendingWithdrawals.length
-  const pendingTotal = pendingWithdrawals.reduce((sum, t) => sum + (t.amount ?? 0), 0)
+  const completedPayments = allRawData.filter(t => t.type === "Received" && t.isPending === false && !t.isVemreCharge)
+  const pendingCount = completedPayments.length
+  const pendingTotal = completedPayments.reduce((sum, t) => sum + (t.amount ?? 0), 0)
 
   const handleBulkPayout = async () => {
     try {
@@ -172,6 +172,19 @@ export default function AllTransactions() {
             />
             <Search className="absolute left-2.5 h-4 w-4 text-gray-400" />
           </div>
+          {/* Bulk payout — always visible so admin can trigger any time (e.g. every Friday) */}
+          <button
+            onClick={() => { setBulkPayoutResult(null); setBulkPayoutOpen(true) }}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 transition-colors"
+          >
+            <Banknote className="h-4 w-4" />
+            Bulk Payout
+            {pendingCount > 0 && (
+              <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-white text-[10px] font-bold text-amber-600">
+                {pendingCount}
+              </span>
+            )}
+          </button>
           <button className="relative p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50">
             <Bell className="h-4 w-4 text-gray-600" />
           </button>
@@ -180,29 +193,20 @@ export default function AllTransactions() {
 
       <div className="flex-1 overflow-y-auto p-6">
 
-        {/* Pending disbursements banner */}
+        {/* Completed payments banner */}
         {pendingCount > 0 && (
-          <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-100">
-                <Banknote className="h-4 w-4 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-amber-800">
-                  {pendingCount} pending withdrawal{pendingCount !== 1 ? "s" : ""} awaiting disbursement
-                </p>
-                <p className="text-xs text-amber-600">
-                  Total: ₦{pendingTotal.toLocaleString()} · Users without a Paystack recipient code will be skipped
-                </p>
-              </div>
+          <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 mb-4">
+            <div className="p-2 rounded-lg bg-amber-100 shrink-0">
+              <Banknote className="h-4 w-4 text-amber-600" />
             </div>
-            <button
-              onClick={() => { setBulkPayoutResult(null); setBulkPayoutOpen(true) }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700 shrink-0"
-            >
-              <Banknote className="h-3.5 w-3.5" />
-              Bulk Payout
-            </button>
+            <div>
+              <p className="text-sm font-semibold text-amber-800">
+                {pendingCount} completed payment{pendingCount !== 1 ? "s" : ""} ready for disbursement
+              </p>
+              <p className="text-xs text-amber-600">
+                Total received: ${pendingTotal.toLocaleString()} · Users without a Paystack recipient code will be skipped
+              </p>
+            </div>
           </div>
         )}
 
@@ -368,25 +372,25 @@ export default function AllTransactions() {
                 <div className="h-1.5 w-full bg-amber-500" />
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-semibold text-gray-900">Confirm Bulk Payout</h3>
+                    <h3 className="text-base font-semibold text-gray-900">Confirm Disbursement</h3>
                     <button onClick={() => setBulkPayoutOpen(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="rounded-xl bg-amber-50 border border-amber-100 p-3">
-                      <p className="text-xs text-amber-600 font-medium mb-1">Pending Withdrawals</p>
+                      <p className="text-xs text-amber-600 font-medium mb-1">Completed Transactions</p>
                       <p className="text-2xl font-bold text-amber-800">{pendingCount}</p>
                     </div>
                     <div className="rounded-xl bg-amber-50 border border-amber-100 p-3">
-                      <p className="text-xs text-amber-600 font-medium mb-1">Total to Disburse</p>
-                      <p className="text-xl font-bold text-amber-800">₦{pendingTotal.toLocaleString()}</p>
+                      <p className="text-xs text-amber-600 font-medium mb-1">Total Received</p>
+                      <p className="text-xl font-bold text-amber-800">${pendingTotal.toLocaleString()}</p>
                     </div>
                   </div>
                   <div className="flex gap-2.5 rounded-lg border border-gray-200 bg-gray-50 p-3 mb-5">
                     <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                     <p className="text-xs text-gray-600 leading-relaxed">
-                      This will initiate a <strong>Paystack bulk transfer</strong> for all pending withdrawals.
-                      Users without a saved Paystack recipient code will be <strong>skipped</strong> automatically.
-                      Processed transactions will be marked as settled.
+                      This will initiate a <strong>Paystack bulk transfer</strong> to pay all freelancers
+                      with completed transactions. Users without a saved Paystack recipient code will be{" "}
+                      <strong>skipped</strong> automatically.
                     </p>
                   </div>
                   <div className="flex gap-3">
@@ -401,7 +405,7 @@ export default function AllTransactions() {
                       disabled={isBulkPaying}
                       className="flex-1 py-2.5 text-sm font-semibold text-white bg-amber-600 rounded-lg hover:bg-amber-700 disabled:opacity-40"
                     >
-                      {isBulkPaying ? "Processing…" : `Disburse ${pendingCount} Payout${pendingCount !== 1 ? "s" : ""}`}
+                      {isBulkPaying ? "Processing…" : `Pay ${pendingCount} Freelancer${pendingCount !== 1 ? "s" : ""}`}
                     </button>
                   </div>
                 </div>
