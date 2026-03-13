@@ -41,6 +41,7 @@ export default function AdminLoginPage() {
         return
       }
       localStorage.setItem("accessToken", data.token)
+      localStorage.setItem("adminId", data.admin._id)
       localStorage.setItem("adminRole", data.admin.role)
       localStorage.setItem("adminName", data.admin.fullname ?? "Admin Manager")
       document.cookie = "auth=authenticated; path=/; max-age=86400"
