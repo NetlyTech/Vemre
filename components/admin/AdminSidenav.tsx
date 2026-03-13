@@ -15,6 +15,7 @@ import {
   LogOut,
   Menu,
   X,
+  UserCog,
 } from "lucide-react"
 import type { TAdminRole } from "@/lib/auth.type"
 import UserAvatar from "./UserAvatar"
@@ -32,6 +33,7 @@ const mainNav: NavItem[] = [
   { label: "KYC Review", href: "/admin/kyc", icon: <ShieldCheck className="h-5 w-5" /> },
   { label: "Transactions", href: "/admin/transactions", icon: <ArrowLeftRight className="h-5 w-5" />, internationalOnly: true },
   { label: "FX Rates", href: "/admin/fx", icon: <TrendingUp className="h-5 w-5" />, internationalOnly: true },
+  { label: "Admins", href: "/admin/admins", icon: <UserCog className="h-5 w-5" />, internationalOnly: true },
   { label: "Export Data", href: "/admin/export", icon: <Download className="h-5 w-5" /> },
 ]
 
@@ -55,6 +57,7 @@ export default function AdminSidenav() {
 
   const logout = () => {
     localStorage.removeItem("accessToken")
+    localStorage.removeItem("adminId")
     localStorage.removeItem("adminRole")
     localStorage.removeItem("adminName")
     document.cookie = "auth=; path=/; max-age=0"
