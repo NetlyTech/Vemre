@@ -106,6 +106,7 @@ const kycstatue = "/api/admin/kycstatue";
 const allkycs = "/api/user/kycs";
 const alltransactions = "/api/user/transactions";
 const sendmoney = "/api/user/sendmoney";
+const bulkpayout = "/api/admin/payout/bulk";
 
 
 class UserServices {
@@ -139,15 +140,22 @@ class UserServices {
         return response.data
     }
 
-       /**
-     * create 
-     * @returns
+    /**
+     * Manually mark a single withdrawal transaction as sent
      */
-       async createuserwithdrawl(data: {txnId: string}) {
+    async createuserwithdrawl(data: {txnId: string}) {
         return await rootAxiosInstance.post(sendmoney, data)
     }
 
-
+    /**
+     * Trigger Paystack bulk transfer for ALL pending withdrawal transactions.
+     * Skips users without a paystack_recipient_code.
+     * Marks processed transactions as isPending=false.
+     */
+    async bulkPayout(): Promise<{ message: string; processed?: number; skipped?: number }> {
+        const response = await rootAxiosInstance.post(bulkpayout, {})
+        return response.data
+    }
 }
 
 export default UserServices;

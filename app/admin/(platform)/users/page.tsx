@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Bell, Search, Filter, Mail, Phone, Calendar, MapPin, Building2, MessageSquare, Ban, CreditCard, Landmark, ArrowLeftRight } from "lucide-react"
+import { Bell, Search, Filter, Mail, Phone, Calendar, MapPin, Building2, Ban, Landmark, ArrowLeftRight } from "lucide-react"
 import { Users, UserCheck, UserX } from "lucide-react"
 import dayjs from "@/lib/dayjs"
 import UserQueries from "@/requestapi/queries/userQueries"
@@ -28,7 +28,7 @@ export default function UsersPage() {
   const [query, setQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [selectedUser, setSelectedUser] = useState<SelectedUser | null>(null)
-  const [commentOpen, setCommentOpen] = useState(false)
+  const [approveOpen, setApproveOpen] = useState(false)
   const [suspendOpen, setSuspendOpen] = useState(false)
   const [reason, setReason] = useState("")
 
@@ -57,6 +57,18 @@ export default function UsersPage() {
   const activeUsers = allUsers.filter(u => u.status === "Active").length
   const pendingUsers = allUsers.filter(u => u.status === "Pending").length
   const suspendedUsers = allUsers.filter(u => u.status === "Suspended").length
+
+  const handleApprove = async () => {
+    if (!selectedUser || !reason.trim()) return
+    try {
+      await mutateAsync({ admin_verify_status: "approved", id: selectedUser.id, reason })
+      setApproveOpen(false)
+      setReason("")
+      setSelectedUser(prev => prev ? { ...prev, status: "Active" } : null)
+    } catch (error) {
+      window.alert(getError(error))
+    }
+  }
 
   const handleSuspend = async () => {
     if (!selectedUser || !reason.trim()) return
@@ -177,20 +189,42 @@ export default function UsersPage() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <button
-                      onClick={() => { setReason(""); setCommentOpen(true) }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                    >
-                      <MessageSquare className="h-3.5 w-3.5" />
-                      Comment
-                    </button>
-                    <button
-                      onClick={() => { setReason(""); setSuspendOpen(true) }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500 text-xs font-medium text-white hover:bg-red-600"
-                    >
-                      <Ban className="h-3.5 w-3.5" />
-                      Suspend
-                    </button>
+                    {selectedUser.status === "Pending" && (
+                      <>
+                        <button
+                          onClick={() => { setReason(""); setApproveOpen(true) }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 text-xs font-medium text-white hover:bg-green-700"
+                        >
+                          <UserCheck className="h-3.5 w-3.5" />
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => { setReason(""); setSuspendOpen(true) }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500 text-xs font-medium text-white hover:bg-red-600"
+                        >
+                          <Ban className="h-3.5 w-3.5" />
+                          Reject
+                        </button>
+                      </>
+                    )}
+                    {selectedUser.status === "Active" && (
+                      <button
+                        onClick={() => { setReason(""); setSuspendOpen(true) }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500 text-xs font-medium text-white hover:bg-red-600"
+                      >
+                        <Ban className="h-3.5 w-3.5" />
+                        Suspend
+                      </button>
+                    )}
+                    {selectedUser.status === "Suspended" && (
+                      <button
+                        onClick={() => { setReason(""); setApproveOpen(true) }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 text-xs font-medium text-white hover:bg-green-700"
+                      >
+                        <UserCheck className="h-3.5 w-3.5" />
+                        Reinstate
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -316,51 +350,61 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* Comment modal */}
-      {commentOpen && (
+      {/* Approve / Reinstate modal */}
+      {approveOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl w-full max-w-md mx-4 p-6 shadow-2xl">
-            <div className="flex items-center justify-between mb-1">
-              <h3 className="text-base font-semibold text-gray-900">Add Moderation Comment</h3>
-              <button onClick={() => setCommentOpen(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
-            </div>
-            <p className="text-xs text-gray-500 mb-4">Add an internal moderation note for {selectedUser?.name}</p>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Your Comment</label>
-            <textarea
-              rows={4}
-              placeholder="Type your comment here…"
-              value={reason}
-              onChange={e => setReason(e.target.value)}
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-1 focus:ring-primary/40"
-            />
-            <div className="flex gap-3 justify-end mt-4">
-              <button onClick={() => setCommentOpen(false)} className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
-              <button
-                onClick={() => setCommentOpen(false)}
-                disabled={!reason.trim()}
-                className="px-5 py-2 text-sm font-semibold text-white bg-primary rounded-lg hover:opacity-90 disabled:opacity-40"
-              >
-                Add Comment
-              </button>
+          <div className="bg-white rounded-2xl w-full max-w-md mx-4 shadow-2xl overflow-hidden">
+            <div className="h-1.5 w-full bg-green-500" />
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-base font-semibold text-gray-900">
+                  {selectedUser?.status === "Suspended" ? "Reinstate" : "Approve"} {selectedUser?.name}
+                </h3>
+                <button onClick={() => setApproveOpen(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+              </div>
+              <p className="text-xs text-gray-500 mb-4">
+                Please provide a reason for {selectedUser?.status === "Suspended" ? "reinstating" : "approving"} this account.
+              </p>
+              <textarea
+                rows={4}
+                placeholder="Reason for approval…"
+                value={reason}
+                onChange={e => setReason(e.target.value)}
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-1 focus:ring-green-300"
+              />
+              <div className="flex gap-3 justify-end mt-4">
+                <button onClick={() => setApproveOpen(false)} className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
+                <button
+                  onClick={handleApprove}
+                  disabled={!reason.trim() || isPending}
+                  className="px-5 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-40"
+                >
+                  {isPending ? "Processing…" : selectedUser?.status === "Suspended" ? "Confirm Reinstatement" : "Confirm Approval"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Suspend modal */}
+      {/* Reject / Suspend modal */}
       {suspendOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-2xl w-full max-w-md mx-4 shadow-2xl overflow-hidden">
             <div className="h-1.5 w-full bg-red-500" />
             <div className="p-6">
               <div className="flex items-center justify-between mb-1">
-                <h3 className="text-base font-semibold text-gray-900">Suspend {selectedUser?.name}</h3>
+                <h3 className="text-base font-semibold text-gray-900">
+                  {selectedUser?.status === "Pending" ? "Reject" : "Suspend"} {selectedUser?.name}
+                </h3>
                 <button onClick={() => setSuspendOpen(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
               </div>
-              <p className="text-xs text-gray-500 mb-4">Please provide a reason for suspending this account. This action can be reversed later.</p>
+              <p className="text-xs text-gray-500 mb-4">
+                Please provide a reason for {selectedUser?.status === "Pending" ? "rejecting" : "suspending"} this account. This action can be reversed later.
+              </p>
               <textarea
                 rows={4}
-                placeholder="Reason for suspension…"
+                placeholder={selectedUser?.status === "Pending" ? "Reason for rejection…" : "Reason for suspension…"}
                 value={reason}
                 onChange={e => setReason(e.target.value)}
                 className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-1 focus:ring-red-300"
@@ -372,7 +416,7 @@ export default function UsersPage() {
                   disabled={!reason.trim() || isPending}
                   className="px-5 py-2 text-sm font-semibold text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-40"
                 >
-                  {isPending ? "Suspending…" : "Confirm Suspension"}
+                  {isPending ? "Processing…" : selectedUser?.status === "Pending" ? "Confirm Rejection" : "Confirm Suspension"}
                 </button>
               </div>
             </div>
