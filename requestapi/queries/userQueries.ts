@@ -3,7 +3,7 @@ import UserServices from "../instances/userRequest";
 // import { Tcreate_transactionSchema } from "constants/transaction.type";
 
 
-const {  alltransactions, createuserwithdrawl, allkycs, kycStatus} = new UserServices()
+const {  alltransactions, createuserwithdrawl, allkycs, kycStatus, bulkPayout } = new UserServices()
 
 class UserQueries {
 
@@ -34,19 +34,24 @@ class UserQueries {
     setCreateuserWithdrawal = () => {
       const queryClient = useQueryClient();
 
-      return  useMutation({
-      mutationFn: (data: {txnId: string}) => {
-        return createuserwithdrawl(data)
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['alltransactions'] });
-      }
-    });
+      return useMutation({
+        mutationFn: (data: {txnId: string}) => createuserwithdrawl(data),
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['alltransactions'] });
+        }
+      });
     }
-      
-     
 
+    useBulkPayout = () => {
+      const queryClient = useQueryClient();
 
+      return useMutation({
+        mutationFn: () => bulkPayout(),
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ['alltransactions'] });
+        }
+      });
+    }
 }
 
 export default UserQueries;

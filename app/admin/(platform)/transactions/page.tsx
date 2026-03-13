@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Bell, Search, Filter, Download } from "lucide-react"
+import { Bell, Search, Filter, Banknote, AlertTriangle, CheckCircle2, Landmark } from "lucide-react"
 import UserQueries from "@/requestapi/queries/userQueries"
 import dayjs from "@/lib/dayjs"
 import { formatInky } from "@/lib/utils"
@@ -17,16 +17,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
 } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
 
-const { useAlTransactions, setCreateuserWithdrawal } = new UserQueries()
+const { useAlTransactions, useBulkPayout } = new UserQueries()
 
 type Transaction = {
   id: string
   date: string
-  rawDate?: string
   time?: string
   freelancer?: string
   ref?: string
@@ -66,26 +63,28 @@ type Transaction = {
 
 export default function AllTransactions() {
   const { data, isLoading } = useAlTransactions()
-  const { mutateAsync, isPending } = setCreateuserWithdrawal()
+  const { mutateAsync: runBulkPayout, isPending: isBulkPaying } = useBulkPayout()
 
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
+  const [bulkPayoutOpen, setBulkPayoutOpen] = useState(false)
+  const [bulkPayoutResult, setBulkPayoutResult] = useState<{ message: string; processed?: number; skipped?: number } | null>(null)
 
   let transactions: Transaction[] = data?.data?.map(item => {
     const bankName = item.type === "Received" ? item.user?.bank_account?.bankName : item.bank_name
     const accountNumber = item.type === "Received" ? item.user?.bank_account?.accountNumber : item.account_number
     const accountName = item.type === "Received" ? item.user?.bank_account?.accountName : item.recipientName
     const amount = item.amount ?? 0
-    const serviceFee = item.type === "Received" ? amount * 0.2 : 0
-    const net = item.type === "Received" ? amount - serviceFee : amount
+    const serviceFee = item.type === "Received" && !item.isVemreCharge ? +(amount * 0.2).toFixed(2) : 0
+    const net = serviceFee ? +(amount - serviceFee).toFixed(2) : amount
 
     return {
       _id: item._id,
       id: item._id,
-      ref: `TXN-${item._id?.slice(-3).toUpperCase()}`,
+      ref: `TXN-${item._id?.slice(-6).toUpperCase()}`,
       customerName: item.senderName,
       freelancer: item.user?.fullname,
       type: item.type,
@@ -107,7 +106,6 @@ export default function AllTransactions() {
       status: item.isPending ? "Pending" : "Completed",
       description: item.description,
       date: dayjs(item.updatedAt).format("YYYY-MM-DD"),
-      rawDate: item.updatedAt,
       time: dayjs(item.updatedAt).format("hh:mm A"),
       details: {
         reference: item._id,
@@ -139,19 +137,25 @@ export default function AllTransactions() {
     .filter(t => (statusFilter ? t.status === statusFilter : true))
     .filter(t => (typeFilter ? t.type === typeFilter : true))
 
-  const handlePay = async () => {
+  // Pending withdrawals for bulk payout banner
+  const allRawData = data?.data ?? []
+  const pendingWithdrawals = allRawData.filter(t => t.type === "Withdraw" && t.isPending === true)
+  const pendingCount = pendingWithdrawals.length
+  const pendingTotal = pendingWithdrawals.reduce((sum, t) => sum + (t.amount ?? 0), 0)
+
+  const handleBulkPayout = async () => {
     try {
-      if (!window.confirm("Do you want to continue with the payment?")) return
-      await mutateAsync({ txnId: selectedTransaction?.id! })
-      setIsDetailsOpen(false)
+      const result = await runBulkPayout()
+      setBulkPayoutResult(result)
     } catch (error) {
       window.alert(getError(error))
+      setBulkPayoutOpen(false)
     }
   }
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
-      {(isLoading || isPending) && <OverlayLoader />}
+      {(isLoading || isBulkPaying) && <OverlayLoader />}
 
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
@@ -175,13 +179,40 @@ export default function AllTransactions() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-6">
+
+        {/* Pending disbursements banner */}
+        {pendingCount > 0 && (
+          <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-100">
+                <Banknote className="h-4 w-4 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-amber-800">
+                  {pendingCount} pending withdrawal{pendingCount !== 1 ? "s" : ""} awaiting disbursement
+                </p>
+                <p className="text-xs text-amber-600">
+                  Total: ₦{pendingTotal.toLocaleString()} · Users without a Paystack recipient code will be skipped
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => { setBulkPayoutResult(null); setBulkPayoutOpen(true) }}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700 shrink-0"
+            >
+              <Banknote className="h-3.5 w-3.5" />
+              Bulk Payout
+            </button>
+          </div>
+        )}
+
         {/* Filter bar */}
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <div className="relative flex items-center">
             <Search className="absolute left-2.5 h-3.5 w-3.5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search for anything"
+              placeholder="Search name, ref, email…"
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary/40 w-52"
@@ -209,7 +240,6 @@ export default function AllTransactions() {
               <option value="">All Status</option>
               <option value="Completed">Completed</option>
               <option value="Pending">Pending</option>
-              <option value="Failed">Failed</option>
             </select>
           </div>
           <div className="ml-auto">
@@ -224,18 +254,18 @@ export default function AllTransactions() {
         {/* Table */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[1000px]">
+            <table className="w-full text-sm min-w-[1100px]">
               <thead>
-                <tr className="border-b border-gray-100 text-left">
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">ID</th>
+                <tr className="border-b border-gray-100 text-left bg-gray-50/60">
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Ref</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">User</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Customer</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Type</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Amount</th>
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Service Fee (20%)</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">FX Rate</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Converted (NGN)</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Fee (20%)</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Net</th>
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Provider</th>
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Invoice Ref</th>
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Reason</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Status</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Date</th>
                 </tr>
@@ -255,7 +285,8 @@ export default function AllTransactions() {
                     onClick={() => { setSelectedTransaction(t); setIsDetailsOpen(true) }}
                   >
                     <td className="px-4 py-3 font-mono text-xs text-gray-500">{t.ref}</td>
-                    <td className="px-4 py-3 text-sm text-gray-800">{t.freelancer ?? t.customerName ?? "—"}</td>
+                    <td className="px-4 py-3 text-sm text-gray-800">{t.freelancer ?? "—"}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{t.customerName ?? "—"}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                         t.type === "Received" ? "bg-green-50 text-green-700" : "bg-blue-50 text-blue-700"
@@ -264,19 +295,29 @@ export default function AllTransactions() {
                       </span>
                     </td>
                     <td className={`px-4 py-3 text-sm font-medium ${t.amountClass}`}>
-                      {formatInky(t.amount?.toString() ?? "0")}
+                      <span>{formatInky(t.amount?.toString() ?? "0")}</span>
+                      {t.baseCurrency && (
+                        <span className="ml-1 text-xs text-gray-400 font-normal">{t.baseCurrency}</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
-                      {t.type === "Received" ? formatInky(t.serviceFee?.toString() ?? "0") : "—"}
+                      {t.fxRate
+                        ? <span className="font-mono">₦{t.fxRate.toLocaleString()}</span>
+                        : <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-800 font-medium">
+                      {t.convertedAmount
+                        ? <span>₦{t.convertedAmount.toLocaleString()}</span>
+                        : <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-600">
+                      {t.serviceFee ? formatInky(t.serviceFee.toString()) : <span className="text-gray-300">—</span>}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-800 font-medium">
                       {formatInky(t.net?.toString() ?? "0")}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600 capitalize">{t.provider ?? "—"}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-gray-500 truncate max-w-[100px]">{t.invoiceRef ?? "—"}</td>
-                    <td className="px-4 py-3 text-xs text-gray-500 truncate max-w-[120px]">{t.reason ?? "—"}</td>
                     <td className="px-4 py-3"><StatusBadge status={t.status} /></td>
-                    <td className="px-4 py-3 text-xs text-gray-500">{t.date}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{t.date}</td>
                   </tr>
                 ))}
               </tbody>
@@ -285,47 +326,211 @@ export default function AllTransactions() {
         </div>
       </div>
 
-      {/* Details modal */}
+      {/* Bulk payout confirmation dialog */}
+      {bulkPayoutOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl w-full max-w-md mx-4 shadow-2xl overflow-hidden">
+            {bulkPayoutResult ? (
+              <>
+                <div className="h-1.5 w-full bg-green-500" />
+                <div className="p-6 text-center">
+                  <div className="mx-auto mb-4 h-14 w-14 rounded-full bg-green-50 flex items-center justify-center">
+                    <CheckCircle2 className="h-7 w-7 text-green-600" />
+                  </div>
+                  <h3 className="text-base font-semibold text-gray-900 mb-1">Bulk Payout Initiated</h3>
+                  <p className="text-sm text-gray-500 mb-4">{bulkPayoutResult.message}</p>
+                  {(bulkPayoutResult.processed != null || bulkPayoutResult.skipped != null) && (
+                    <div className="grid grid-cols-2 gap-3 mb-5">
+                      {bulkPayoutResult.processed != null && (
+                        <div className="rounded-lg bg-green-50 p-3">
+                          <p className="text-xl font-bold text-green-700">{bulkPayoutResult.processed}</p>
+                          <p className="text-xs text-green-600 mt-0.5">Processed</p>
+                        </div>
+                      )}
+                      {bulkPayoutResult.skipped != null && (
+                        <div className="rounded-lg bg-gray-50 p-3">
+                          <p className="text-xl font-bold text-gray-700">{bulkPayoutResult.skipped}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">Skipped</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setBulkPayoutOpen(false)}
+                    className="w-full py-2.5 text-sm font-semibold text-white bg-primary rounded-lg hover:opacity-90"
+                  >
+                    Done
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="h-1.5 w-full bg-amber-500" />
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base font-semibold text-gray-900">Confirm Bulk Payout</h3>
+                    <button onClick={() => setBulkPayoutOpen(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="rounded-xl bg-amber-50 border border-amber-100 p-3">
+                      <p className="text-xs text-amber-600 font-medium mb-1">Pending Withdrawals</p>
+                      <p className="text-2xl font-bold text-amber-800">{pendingCount}</p>
+                    </div>
+                    <div className="rounded-xl bg-amber-50 border border-amber-100 p-3">
+                      <p className="text-xs text-amber-600 font-medium mb-1">Total to Disburse</p>
+                      <p className="text-xl font-bold text-amber-800">₦{pendingTotal.toLocaleString()}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2.5 rounded-lg border border-gray-200 bg-gray-50 p-3 mb-5">
+                    <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      This will initiate a <strong>Paystack bulk transfer</strong> for all pending withdrawals.
+                      Users without a saved Paystack recipient code will be <strong>skipped</strong> automatically.
+                      Processed transactions will be marked as settled.
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setBulkPayoutOpen(false)}
+                      className="flex-1 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleBulkPayout}
+                      disabled={isBulkPaying}
+                      className="flex-1 py-2.5 text-sm font-semibold text-white bg-amber-600 rounded-lg hover:bg-amber-700 disabled:opacity-40"
+                    >
+                      {isBulkPaying ? "Processing…" : `Disburse ${pendingCount} Payout${pendingCount !== 1 ? "s" : ""}`}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Transaction detail drawer */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-auto">
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Transaction Details</DialogTitle>
-            <DialogDescription>Complete information about this transaction</DialogDescription>
+            <DialogDescription>
+              {selectedTransaction?.ref} · {selectedTransaction?.date}
+            </DialogDescription>
           </DialogHeader>
+
           {selectedTransaction && (
-            <div className="space-y-4 text-sm">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold text-base">{selectedTransaction.description ?? selectedTransaction.ref}</span>
-                <span className={`font-bold text-base ${selectedTransaction.amountClass}`}>
-                  {formatInky(selectedTransaction.amount?.toString() ?? "0")}
-                </span>
+            <div className="space-y-5 text-sm pt-1">
+
+              {/* Amount hero */}
+              <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-400 font-medium mb-0.5">Amount</p>
+                  <p className={`text-2xl font-bold ${selectedTransaction.amountClass}`}>
+                    {formatInky(selectedTransaction.amount?.toString() ?? "0")}
+                    {selectedTransaction.baseCurrency && (
+                      <span className="ml-1.5 text-sm font-semibold text-gray-400">{selectedTransaction.baseCurrency}</span>
+                    )}
+                  </p>
+                </div>
+                <StatusBadge status={selectedTransaction.status} />
               </div>
+
+              {/* Transaction info */}
               <section>
-                <h4 className="font-semibold text-gray-700 mb-2">Transaction</h4>
-                <div className="grid grid-cols-2 gap-y-1.5">
-                  <span className="text-gray-500">Status</span><span><StatusBadge status={selectedTransaction.status} /></span>
-                  <span className="text-gray-500">Date</span><span>{selectedTransaction.date}</span>
-                  <span className="text-gray-500">Time</span><span>{selectedTransaction.details?.time}</span>
-                  <span className="text-gray-500">Reference</span><span className="font-mono text-xs break-all">{selectedTransaction.details?.reference}</span>
-                  <span className="text-gray-500">Type</span><span>{selectedTransaction.details?.category}</span>
-                  <span className="text-gray-500">Provider</span><span>{selectedTransaction.provider}</span>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2.5">Transaction</h4>
+                <div className="grid grid-cols-2 gap-y-2.5">
+                  <span className="text-gray-500">Reference</span>
+                  <span className="font-mono text-xs break-all text-gray-800">{selectedTransaction.details?.reference ?? "—"}</span>
+                  <span className="text-gray-500">Type</span>
+                  <span>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                      selectedTransaction.type === "Received" ? "bg-green-50 text-green-700" : "bg-blue-50 text-blue-700"
+                    }`}>
+                      {selectedTransaction.type === "Received" ? "Payment" : "Disbursement"}
+                    </span>
+                  </span>
+                  <span className="text-gray-500">Date</span>
+                  <span className="text-gray-800">{selectedTransaction.date}</span>
+                  <span className="text-gray-500">Time</span>
+                  <span className="text-gray-800">{selectedTransaction.time}</span>
+                  <span className="text-gray-500">Provider</span>
+                  <span className="text-gray-800 capitalize">{selectedTransaction.provider ?? "—"}</span>
+                  {selectedTransaction.reason && (
+                    <>
+                      <span className="text-gray-500">Note</span>
+                      <span className="text-gray-800">{selectedTransaction.reason}</span>
+                    </>
+                  )}
                 </div>
               </section>
-              <section>
-                <h4 className="font-semibold text-gray-700 mb-2">User Details</h4>
-                <div className="grid grid-cols-2 gap-y-1.5">
-                  <span className="text-gray-500">Full Name</span><span>{selectedTransaction.details?.fullname ?? "—"}</span>
-                  <span className="text-gray-500">Email</span><span>{selectedTransaction.details?.email ?? "—"}</span>
-                  <span className="text-gray-500">Phone</span><span>{selectedTransaction.details?.phone_number ?? "—"}</span>
-                </div>
-              </section>
-              {selectedTransaction.type === "Withdraw" && selectedTransaction.status === "Pending" && (
-                <DialogFooter>
-                  <Button variant="outline" onClick={handlePay}>
-                    {isPending ? "Paying…" : "Pay"}
-                  </Button>
-                </DialogFooter>
+
+              {/* FX details — only when present */}
+              {selectedTransaction.fxRate && (
+                <section>
+                  <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2.5">Exchange Rate</h4>
+                  <div className="rounded-xl bg-primary/5 border border-primary/10 p-3.5 grid grid-cols-2 gap-y-2.5">
+                    <span className="text-gray-500">Rate at Transaction</span>
+                    <span className="font-semibold text-gray-900 font-mono">₦{selectedTransaction.fxRate.toLocaleString()}</span>
+                    <span className="text-gray-500">Pair</span>
+                    <span className="font-medium text-gray-800">
+                      {selectedTransaction.baseCurrency ?? "—"} → {selectedTransaction.targetCurrency ?? "—"}
+                    </span>
+                    <span className="text-gray-500">Converted Amount</span>
+                    <span className="font-semibold text-gray-900">
+                      ₦{selectedTransaction.convertedAmount?.toLocaleString() ?? "—"}
+                    </span>
+                    {selectedTransaction.serviceFee ? (
+                      <>
+                        <span className="text-gray-500">Service Fee (20%)</span>
+                        <span className="text-gray-800">{formatInky(selectedTransaction.serviceFee.toString())}</span>
+                        <span className="text-gray-500">Net Payout</span>
+                        <span className="font-semibold text-green-700">{formatInky(selectedTransaction.net?.toString() ?? "0")}</span>
+                      </>
+                    ) : null}
+                  </div>
+                </section>
               )}
+
+              {/* User info */}
+              <section>
+                <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2.5">User</h4>
+                <div className="grid grid-cols-2 gap-y-2.5">
+                  <span className="text-gray-500">Full Name</span>
+                  <span className="text-gray-800">{selectedTransaction.details?.fullname ?? "—"}</span>
+                  <span className="text-gray-500">Email</span>
+                  <span className="text-gray-800 break-all">{selectedTransaction.details?.email ?? "—"}</span>
+                  <span className="text-gray-500">Phone</span>
+                  <span className="text-gray-800">{selectedTransaction.details?.phone_number ?? "—"}</span>
+                  {selectedTransaction.customerName && (
+                    <>
+                      <span className="text-gray-500">Sender</span>
+                      <span className="text-gray-800">{selectedTransaction.customerName}</span>
+                    </>
+                  )}
+                </div>
+              </section>
+
+              {/* Bank account — shown for all types when data exists */}
+              {(selectedTransaction.bankName || selectedTransaction.accountNumber) && (
+                <section>
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <Landmark className="h-3.5 w-3.5 text-gray-400" />
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-400">Bank Account</h4>
+                  </div>
+                  <div className="rounded-xl bg-gray-50 border border-gray-100 p-3.5 grid grid-cols-2 gap-y-2.5">
+                    <span className="text-gray-500">Bank</span>
+                    <span className="font-medium text-gray-800">{selectedTransaction.bankName ?? "—"}</span>
+                    <span className="text-gray-500">Account No.</span>
+                    <span className="font-mono text-gray-800">{selectedTransaction.accountNumber ?? "—"}</span>
+                    <span className="text-gray-500">Account Name</span>
+                    <span className="text-gray-800">{selectedTransaction.accountName ?? "—"}</span>
+                  </div>
+                </section>
+              )}
+
             </div>
           )}
         </DialogContent>
