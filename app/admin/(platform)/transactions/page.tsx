@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Bell, Search, Filter, Banknote, AlertTriangle, CheckCircle2, Landmark } from "lucide-react"
+import { Search, Filter, Banknote, AlertTriangle, CheckCircle2, Landmark } from "lucide-react"
+import NotificationBell from "@/components/admin/NotificationBell"
 import UserQueries from "@/requestapi/queries/userQueries"
 import dayjs from "@/lib/dayjs"
 import { formatInky } from "@/lib/utils"
@@ -185,9 +186,7 @@ export default function AllTransactions() {
               </span>
             )}
           </button>
-          <button className="relative p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50">
-            <Bell className="h-4 w-4 text-gray-600" />
-          </button>
+          <NotificationBell />
         </div>
       </div>
 
@@ -266,12 +265,12 @@ export default function AllTransactions() {
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Customer</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Type</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Amount</th>
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">FX Rate</th>
-                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Converted (NGN)</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Fee (20%)</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Net</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Status</th>
                   <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Date</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">FX Rate</th>
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-400">Converted (NGN)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -305,6 +304,14 @@ export default function AllTransactions() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
+                      {t.serviceFee ? formatInky(t.serviceFee.toString()) : <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-800 font-medium">
+                      {formatInky(t.net?.toString() ?? "0")}
+                    </td>
+                    <td className="px-4 py-3"><StatusBadge status={t.status} /></td>
+                    <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{t.date}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">
                       {t.fxRate
                         ? <span className="font-mono">₦{t.fxRate.toLocaleString()}</span>
                         : <span className="text-gray-300">—</span>}
@@ -314,14 +321,6 @@ export default function AllTransactions() {
                         ? <span>₦{t.convertedAmount.toLocaleString()}</span>
                         : <span className="text-gray-300">—</span>}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {t.serviceFee ? formatInky(t.serviceFee.toString()) : <span className="text-gray-300">—</span>}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-800 font-medium">
-                      {formatInky(t.net?.toString() ?? "0")}
-                    </td>
-                    <td className="px-4 py-3"><StatusBadge status={t.status} /></td>
-                    <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{t.date}</td>
                   </tr>
                 ))}
               </tbody>

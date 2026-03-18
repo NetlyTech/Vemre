@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Bell, Search, Filter, FileText, Camera, ShieldCheck, Eye } from "lucide-react"
+import { Search, Filter, FileText, Camera, ShieldCheck, Eye } from "lucide-react"
 import dayjs from "@/lib/dayjs"
 import UserQueries from "@/requestapi/queries/userQueries"
 import { getError } from "@/lib/requestError"
@@ -9,6 +9,7 @@ import OverlayLoader from "@/components/OverLayLoader"
 import StatCard from "@/components/admin/StatCard"
 import StatusBadge from "@/components/admin/StatusBadge"
 import UserAvatar from "@/components/admin/UserAvatar"
+import NotificationBell from "@/components/admin/NotificationBell"
 
 const { useAllKycs, setKycStatus } = new UserQueries()
 
@@ -83,9 +84,7 @@ export default function KycPage() {
             />
             <Search className="absolute left-2.5 h-4 w-4 text-gray-400" />
           </div>
-          <button className="relative p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50">
-            <Bell className="h-4 w-4 text-gray-600" />
-          </button>
+          <NotificationBell />
         </div>
       </div>
 

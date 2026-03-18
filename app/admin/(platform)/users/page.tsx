@@ -1,15 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { Bell, Search, Filter, Mail, Phone, Calendar, MapPin, Building2, Ban, Landmark, ArrowLeftRight } from "lucide-react"
+import { Search, Filter, Mail, Phone, Calendar, MapPin, Building2, Ban, Landmark, ArrowLeftRight } from "lucide-react"
 import { Users, UserCheck, UserX } from "lucide-react"
 import dayjs from "@/lib/dayjs"
 import UserQueries from "@/requestapi/queries/userQueries"
+import AdminQueries from "@/requestapi/queries/adminQueries"
 import { getError } from "@/lib/requestError"
 import OverlayLoader from "@/components/OverLayLoader"
 import StatCard from "@/components/admin/StatCard"
 import StatusBadge from "@/components/admin/StatusBadge"
 import UserAvatar from "@/components/admin/UserAvatar"
+import NotificationBell from "@/components/admin/NotificationBell"
 
 const { useAllKycs, setKycStatus, useAlTransactions } = new UserQueries()
 
@@ -25,6 +27,7 @@ type SelectedUser = {
 }
 
 export default function UsersPage() {
+  const [mainTab, setMainTab] = useState<"active" | "deleted">("active")
   const [query, setQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [selectedUser, setSelectedUser] = useState<SelectedUser | null>(null)
@@ -35,6 +38,7 @@ export default function UsersPage() {
   const { data, isLoading } = useAllKycs()
   const { data: txData } = useAlTransactions()
   const { mutateAsync, isPending } = setKycStatus()
+  const { data: deletedData } = new AdminQueries().useDeletedUsers()
 
   const allUsers: SelectedUser[] = data?.data.map(v => ({
     id: v._id,
@@ -106,9 +110,7 @@ export default function UsersPage() {
             />
             <Search className="absolute left-2.5 h-4 w-4 text-gray-400" />
           </div>
-          <button className="relative p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50">
-            <Bell className="h-4 w-4 text-gray-600" />
-          </button>
+          <NotificationBell />
         </div>
       </div>
 
@@ -121,8 +123,65 @@ export default function UsersPage() {
           <StatCard label="Suspended" value={suspendedUsers} subtext="5 New Today" subtextClass="text-gray-500" icon={<UserX className="h-4 w-4 text-red-600" />} iconBg="bg-red-50" accentColor="bg-red-400" />
         </div>
 
+        {/* Tab strip */}
+        <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+          <button
+            onClick={() => setMainTab("active")}
+            className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${mainTab === "active" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+          >
+            Active Users
+          </button>
+          <button
+            onClick={() => setMainTab("deleted")}
+            className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${mainTab === "deleted" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+          >
+            Deleted Accounts
+          </button>
+        </div>
+
+        {/* Deleted accounts view */}
+        {mainTab === "deleted" && (
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-5 py-3 border-b border-gray-100">
+              <p className="text-sm font-medium text-gray-700">Deleted Accounts</p>
+              <p className="text-xs text-gray-400">{deletedData?.data?.length ?? 0} accounts</p>
+            </div>
+            {!deletedData?.data?.length ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center px-6">
+                <div className="h-14 w-14 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                  <UserX className="h-6 w-6 text-gray-300" />
+                </div>
+                <p className="text-sm font-semibold text-gray-700">No deleted accounts</p>
+                <p className="text-xs text-gray-400 mt-1">Deleted user accounts will appear here</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-50">
+                {deletedData.data.map(u => (
+                  <div key={u._id} className="flex items-center gap-3 px-5 py-3">
+                    <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-medium text-gray-500">
+                        {(u.fullname ?? u.email).charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-800 truncate">{u.fullname ?? "—"}</p>
+                      <p className="text-xs text-gray-400 truncate">{u.email}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-50 text-red-600">Deleted</span>
+                      {u.updatedAt && (
+                        <p className="text-[10px] text-gray-400 mt-0.5">{dayjs(u.updatedAt).format("MMM D, YYYY")}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Main split panel */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-[500px]">
+        {mainTab === "active" && <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-[500px]">
           {/* User list */}
           <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
             <div className="flex items-center gap-2 p-3 border-b border-gray-100">
@@ -347,7 +406,7 @@ export default function UsersPage() {
               </div>
             )}
           </div>
-        </div>
+        </div>}
       </div>
 
       {/* Approve / Reinstate modal */}
