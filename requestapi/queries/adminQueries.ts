@@ -35,6 +35,31 @@ class AdminQueries {
       },
     })
   }
+
+  useAdminNotifications = () => {
+    return useQuery({
+      queryKey: ["adminNotifications"],
+      queryFn: () => adminServices.getNotifications(),
+      refetchInterval: 30_000,
+    })
+  }
+
+  useMarkNotificationsRead = () => {
+    const queryClient = useQueryClient()
+    return useMutation({
+      mutationFn: () => adminServices.markNotificationsRead(),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["adminNotifications"] })
+      },
+    })
+  }
+
+  useDeletedUsers = () => {
+    return useQuery({
+      queryKey: ["deletedUsers"],
+      queryFn: () => adminServices.getDeletedUsers(),
+    })
+  }
 }
 
 export default AdminQueries
