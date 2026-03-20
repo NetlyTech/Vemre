@@ -1,24 +1,23 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Users, DollarSign, ArrowLeftRight, ShieldCheck, Clock } from "lucide-react"
+import { Bell, Users, DollarSign, ArrowLeftRight, ShieldCheck, Clock } from "lucide-react"
 import {
   AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts"
+import UserQueries from "@/requestapi/queries/userQueries"
 import AdminQueries from "@/requestapi/queries/adminQueries"
+import { formatInky } from "@/lib/utils"
 import dayjs from "@/lib/dayjs"
+import OverlayLoader from "@/components/OverLayLoader"
 import StatCard from "@/components/admin/StatCard"
 import StatusBadge from "@/components/admin/StatusBadge"
 import UserAvatar from "@/components/admin/UserAvatar"
 import NotificationBell from "@/components/admin/NotificationBell"
-import OverlayLoader from "@/components/OverLayLoader"
 
-const MONTH_LABELS = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-// MongoDB $dayOfWeek: 1=Sun, 2=Mon, 3=Tue, 4=Wed, 5=Thu, 6=Fri, 7=Sat
-const DAY_LABELS: Record<number, string> = { 1: "Sun", 2: "Mon", 3: "Tue", 4: "Wed", 5: "Thu", 6: "Fri", 7: "Sat" }
-
-const adminQueries = new AdminQueries()
+const { useAlTransactions, useAllKycs } = new UserQueries()
+const { useRevenueByMonth } = new AdminQueries()
 
 export default function Dashboard() {
   const [adminName, setAdminName] = useState("Admin")
@@ -28,60 +27,63 @@ export default function Dashboard() {
     setAdminName(name.split(" ")[0])
   }, [])
 
-  const { data, isLoading } = adminQueries.useDashboard()
+  const { data: txData,  isLoading: txLoading  } = useAlTransactions()
+  const { data: kycData, isLoading: kycLoading } = useAllKycs()
+  const { data: revenueData, isLoading: revenueLoading } = useRevenueByMonth()
 
-  // ── Stat cards ──────────────────────────────────────────────────────────────
-  const totalUsers   = data?.totalUsers   ?? { value: 0, changePercent: 0 }
-  const revenue      = data?.revenue      ?? { value: 0, changePercent: 0 }
-  const transactions = data?.transactions ?? { value: 0, changePercent: 0 }
-  const pendingKyc   = data?.pendingKyc   ?? { value: 0, newToday: 0 }
+  // ── Stat cards ─────────────────────────────────────────────────────────────
+  const stats = txData?.data.reduce((acc, item) => {
+    if (!item.isPending && !item.isVemreCharge) acc.received += item.amount ?? 0
+    if (item.isVemreCharge) acc.revenue += item.amount ?? 0
+    acc.count += 1
+    return acc
+  }, { received: 0, revenue: 0, count: 0 }) ?? { received: 0, revenue: 0, count: 0 }
 
-  const fmtPct = (n: number) => {
-    const sign = n >= 0 ? "↑" : "↓"
-    return `${sign}${Math.abs(n)}% from last month`
-  }
+  const pendingKyc  = kycData?.data.filter(k => k.admin_verify_status === "pending").length ?? 0
+  const totalUsers  = kycData?.data.length ?? 0
 
-  // ── Revenue chart (last 12 months from backend) ──────────────────────────────
-  const revenueChartData = (data?.revenueOverview ?? []).map(entry => ({
-    month: MONTH_LABELS[entry._id.month] ?? `M${entry._id.month}`,
-    value: entry.total,
-  }))
+  // ── Revenue chart — all 12 months from Revenue collection ──────────────────
+  const revenueChartData = revenueData?.monthly ?? [
+    "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
+  ].map(month => ({ month, totalNGN: 0 }))
 
-  // ── Daily transactions chart (current week, Mon–Sun) ─────────────────────────
-  const dailyMap: Record<string, number> = {}
-  ;(data?.dailyTransactions ?? []).forEach(d => {
-    const label = DAY_LABELS[d._id]
-    if (label) dailyMap[label] = d.count
+  // ── Daily transactions — group confirmed txns by day of week ───────────────
+  const txByDay: Record<string, number> = {}
+  txData?.data.forEach(item => {
+    if (item.updatedAt) {
+      const day = dayjs(item.updatedAt).format("ddd")
+      txByDay[day] = (txByDay[day] ?? 0) + 1
+    }
   })
-  const dailyChartData = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(d => ({
+  const dailyChartData = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d => ({
     day: d,
-    value: dailyMap[d] ?? 0,
+    value: txByDay[d] ?? 0,
   }))
 
-  // ── Recent activity ──────────────────────────────────────────────────────────
-  const recentTxns = (data?.recentActivity.transactions ?? []).map(item => ({
-    id: item._id,
-    name: item.user?.fullname ?? item.senderName ?? "Unknown",
+  // ── Recent activity — last 2 txns + last 2 kyc submissions ────────────────
+  const recentTxns = (txData?.data ?? []).slice(0, 2).map(item => ({
+    id:     item._id,
+    name:   item.user?.fullname ?? item.senderName ?? "Unknown",
     action: item.type === "Received" ? "Payment received" : "Withdrawal request",
     status: item.isPending ? "Pending" : (item.status ?? "confirmed"),
-    time: dayjs(item.updatedAt).fromNow(),
+    time:   dayjs(item.updatedAt).fromNow(),
   }))
 
-  const recentKyc = (data?.recentActivity.kyc ?? []).map(item => ({
-    id: item._id,
-    name: item.user?.fullname ?? `${item.firstname ?? ""} ${item.lastname ?? ""}`.trim(),
+  const recentKyc = (kycData?.data ?? []).slice(0, 2).map(item => ({
+    id:     item._id,
+    name:   item.user?.fullname ?? `${item.firstname ?? ""} ${item.lastname ?? ""}`.trim(),
     action: item.admin_verify_status === "approved" ? "KYC approved" : "KYC submitted",
     status: item.admin_verify_status === "approved"
       ? "approved"
       : item.admin_verify_status === "rejected"
         ? "rejected"
         : "Pending",
-    time: dayjs(item.updatedAt).fromNow(),
+    time:   dayjs(item.updatedAt).fromNow(),
   }))
 
-  const recentActivity = [...recentTxns, ...recentKyc]
-    .sort((a, b) => 0) // backend already sorted; just merge
-    .slice(0, 5)
+  const recentActivity = [...recentTxns, ...recentKyc].slice(0, 4)
+
+  const isLoading = txLoading || kycLoading || revenueLoading
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
@@ -112,36 +114,36 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             label="Total Users"
-            value={totalUsers.value.toLocaleString()}
-            subtext={fmtPct(totalUsers.changePercent)}
-            subtextClass={totalUsers.changePercent >= 0 ? "text-green-600" : "text-red-600"}
+            value={totalUsers.toLocaleString()}
+            subtext={`${kycData?.data.filter(k => k.admin_verify_status === "approved").length ?? 0} verified`}
+            subtextClass="text-green-600"
             icon={<Users className="h-4 w-4 text-gray-600" />}
             iconBg="bg-gray-100"
             accentColor="bg-primary"
           />
           <StatCard
             label="Revenue (NGN)"
-            value={`₦${revenue.value.toLocaleString()}`}
-            subtext={fmtPct(revenue.changePercent)}
-            subtextClass={revenue.changePercent >= 0 ? "text-green-600" : "text-red-600"}
+            value={`₦${(revenueData?.totalNGN ?? 0).toLocaleString()}`}
+            subtext={`$${(revenueData?.totalUSD ?? 0).toLocaleString()} USD commissions`}
+            subtextClass="text-green-600"
             icon={<DollarSign className="h-4 w-4 text-gray-600" />}
             iconBg="bg-gray-100"
             accentColor="bg-primary"
           />
           <StatCard
             label="Transactions"
-            value={transactions.value.toLocaleString()}
-            subtext={fmtPct(transactions.changePercent)}
-            subtextClass={transactions.changePercent >= 0 ? "text-green-600" : "text-red-600"}
+            value={stats.count.toLocaleString()}
+            subtext={`${formatInky(stats.received.toString())} total received`}
+            subtextClass="text-gray-500"
             icon={<ArrowLeftRight className="h-4 w-4 text-gray-600" />}
             iconBg="bg-gray-100"
             accentColor="bg-primary"
           />
           <StatCard
             label="Pending KYC"
-            value={pendingKyc.value}
-            subtext={`${pendingKyc.newToday} new today`}
-            subtextClass="text-gray-500"
+            value={pendingKyc}
+            subtext={`${pendingKyc} awaiting review`}
+            subtextClass="text-amber-600"
             icon={<ShieldCheck className="h-4 w-4 text-gray-600" />}
             iconBg="bg-gray-100"
             accentColor="bg-amber-400"
@@ -150,13 +152,13 @@ export default function Dashboard() {
 
         {/* Charts row */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-          {/* Revenue Overview */}
+          {/* Revenue Overview — all 12 months */}
           <div className="lg:col-span-3 bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <div className="flex items-start gap-2 mb-1">
               <ArrowLeftRight className="h-4 w-4 text-gray-400 mt-0.5" />
               <div>
                 <h3 className="text-sm font-semibold text-gray-800">Revenue Overview (NGN)</h3>
-                <p className="text-xs text-gray-400">20% commission earned over the last 12 months</p>
+                <p className="text-xs text-gray-400">20% commission earned — {revenueData?.year ?? new Date().getFullYear()}</p>
               </div>
             </div>
             <div className="mt-4 h-44">
@@ -164,8 +166,8 @@ export default function Dashboard() {
                 <AreaChart data={revenueChartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2D6A4F" stopOpacity={0.35} />
-                      <stop offset="95%" stopColor="#2D6A4F" stopOpacity={0.02} />
+                      <stop offset="5%"  stopColor="#2D6A4F" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#2D6A4F" stopOpacity={0}   />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" vertical={false} />
@@ -176,12 +178,12 @@ export default function Dashboard() {
                     formatter={(v: number) => [`₦${v.toLocaleString()}`, "Revenue"]}
                   />
                   <Area
-                    type="natural"
-                    dataKey="value"
+                    type="monotone"
+                    dataKey="totalNGN"
                     stroke="#1B3828"
                     strokeWidth={2}
                     fill="url(#revenueGrad)"
-                    dot={{ r: 4, fill: "#1B3828", stroke: "#fff", strokeWidth: 2 }}
+                    dot={{ r: 3, fill: "#1B3828", stroke: "#fff", strokeWidth: 2 }}
                     activeDot={{ r: 5, fill: "#1B3828", stroke: "#fff", strokeWidth: 2 }}
                   />
                 </AreaChart>
@@ -195,7 +197,7 @@ export default function Dashboard() {
               <ArrowLeftRight className="h-4 w-4 text-gray-400 mt-0.5" />
               <div>
                 <h3 className="text-sm font-semibold text-gray-800">Daily Transactions</h3>
-                <p className="text-xs text-gray-400">This week's activity by day</p>
+                <p className="text-xs text-gray-400">Track all your transactions daily</p>
               </div>
             </div>
             <div className="mt-4 h-44">
@@ -225,7 +227,7 @@ export default function Dashboard() {
             {recentActivity.length === 0 && (
               <p className="text-sm text-gray-400 py-4">No recent activity.</p>
             )}
-            {recentActivity.map((item) => (
+            {recentActivity.map(item => (
               <div key={item.id} className="flex items-center justify-between py-3">
                 <div className="flex items-center gap-3">
                   <UserAvatar name={item.name} size="sm" />
