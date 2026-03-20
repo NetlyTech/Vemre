@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Bell, Search, DollarSign, Pencil, Plus, Clock, TrendingUp } from "lucide-react"
+import { Search, DollarSign, Pencil, Plus, Clock, TrendingUp } from "lucide-react"
 import FxQueries from "@/requestapi/queries/fxQueries"
+import NotificationBell from "@/components/admin/NotificationBell"
 import dayjs from "@/lib/dayjs"
 import { getError } from "@/lib/requestError"
 import OverlayLoader from "@/components/OverLayLoader"
@@ -96,9 +97,7 @@ export default function FxPage() {
             />
             <Search className="absolute left-2.5 h-4 w-4 text-gray-400" />
           </div>
-          <button className="relative p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50">
-            <Bell className="h-4 w-4 text-gray-600" />
-          </button>
+          <NotificationBell />
         </div>
       </div>
 

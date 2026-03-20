@@ -1,12 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Bell, Users, DollarSign, ArrowLeftRight, ShieldCheck, Clock } from "lucide-react"
+import { Users, DollarSign, ArrowLeftRight, ShieldCheck, Clock } from "lucide-react"
 import {
   AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts"
 import UserQueries from "@/requestapi/queries/userQueries"
+import NotificationBell from "@/components/admin/NotificationBell"
 import { formatInky } from "@/lib/utils"
 import dayjs from "@/lib/dayjs"
 import { getError } from "@/lib/requestError"
@@ -78,7 +79,7 @@ export default function Dashboard() {
     id: item._id,
     name: item.user?.fullname ?? item.senderName ?? "Unknown",
     action: item.type === "Received" ? "Payment received" : "Withdrawal Requests",
-    status: item.isPending ? "Pending" : item.type === "Received" ? "Completed" : "Processing",
+    status: item.isPending ? "Pending" : (item.status ?? (item.type === "Received" ? "confirmed" : "Processing")),
     time: dayjs(item.updatedAt).fromNow(),
   }))
   const recentKyc = (kycData?.data ?? []).slice(0, 2).map(item => ({
@@ -122,9 +123,7 @@ export default function Dashboard() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
             </svg>
           </div>
-          <button className="relative p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50">
-            <Bell className="h-4 w-4 text-gray-600" />
-          </button>
+          <NotificationBell />
         </div>
       </div>
 

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Bell, Search, Camera, Settings } from "lucide-react"
 import UserAvatar from "@/components/admin/UserAvatar"
+import NotificationBell from "@/components/admin/NotificationBell"
 
 export default function SettingsPage() {
   const [platformName, setPlatformName] = useState("Vemre")
@@ -35,9 +36,7 @@ export default function SettingsPage() {
             />
             <Search className="absolute left-2.5 h-4 w-4 text-gray-400" />
           </div>
-          <button className="relative p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50">
-            <Bell className="h-4 w-4 text-gray-600" />
-          </button>
+          <NotificationBell />
         </div>
       </div>
 

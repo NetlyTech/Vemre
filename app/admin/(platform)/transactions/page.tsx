@@ -104,7 +104,7 @@ export default function AllTransactions() {
       accountNumber,
       bankName,
       amountClass: item.type === "Received" ? "text-green-600" : "text-orange-600",
-      status: item.isPending ? "Pending" : "Completed",
+      status: item.isPending ? "Pending" : (item.status ?? "Confirmed"),
       description: item.description,
       date: dayjs(item.updatedAt).format("YYYY-MM-DD"),
       time: dayjs(item.updatedAt).format("hh:mm A"),
@@ -138,9 +138,11 @@ export default function AllTransactions() {
     .filter(t => (statusFilter ? t.status === statusFilter : true))
     .filter(t => (typeFilter ? t.type === typeFilter : true))
 
-  // Completed received payments ready for disbursement (excludes platform charges)
+  // Confirmed payments not yet disbursed — ready for bulk payout
   const allRawData = data?.data ?? []
-  const completedPayments = allRawData.filter(t => t.type === "Received" && t.isPending === false && !t.isVemreCharge)
+  const completedPayments = allRawData.filter(t =>
+    t.type === "Received" && !t.isPending && !t.isVemreCharge && t.status === "confirmed"
+  )
   const pendingCount = completedPayments.length
   const pendingTotal = completedPayments.reduce((sum, t) => sum + (t.amount ?? 0), 0)
 
@@ -241,8 +243,9 @@ export default function AllTransactions() {
               className="text-sm text-gray-600 bg-transparent focus:outline-none"
             >
               <option value="">All Status</option>
-              <option value="Completed">Completed</option>
               <option value="Pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="disbursed">Disbursed</option>
             </select>
           </div>
           <div className="ml-auto">

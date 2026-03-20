@@ -5,6 +5,7 @@ export type ActivityProps = {
   type?:  "Withdraw" | "Received",
   isPending?: boolean,
   isVemreCharge?: boolean,
+  status?: "confirmed" | "disbursed" | string,
   title?: string;
   description?: string;
   transactionReference?: string;
