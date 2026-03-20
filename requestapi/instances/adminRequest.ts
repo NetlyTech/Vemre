@@ -102,6 +102,16 @@ class AdminServices {
     const response = await rootAxiosInstance.get("/api/admin/dashboard")
     return response.data
   }
+
+  async getRevenueByMonth(): Promise<{
+    year: number
+    totalNGN: number
+    totalUSD: number
+    monthly: { month: string; totalNGN: number }[]
+  }> {
+    const response = await rootAxiosInstance.get("/api/admin/revenue")
+    return response.data
+  }
 }
 
 export default AdminServices

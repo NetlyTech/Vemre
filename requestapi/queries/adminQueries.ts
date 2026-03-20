@@ -68,6 +68,14 @@ class AdminQueries {
       refetchInterval: 60_000,
     })
   }
+
+  useRevenueByMonth = () => {
+    return useQuery({
+      queryKey: ["adminRevenue"],
+      queryFn: () => adminServices.getRevenueByMonth(),
+      refetchInterval: 60_000,
+    })
+  }
 }
 
 export default AdminQueries
