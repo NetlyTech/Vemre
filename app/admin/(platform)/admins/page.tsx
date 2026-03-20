@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bell, Search, Plus, Trash2, ShieldCheck, ShieldAlert, Mail, Calendar, Eye, EyeOff } from "lucide-react"
+import { Search, Plus, Trash2, ShieldCheck, ShieldAlert, Mail, Calendar, Eye, EyeOff } from "lucide-react"
+import NotificationBell from "@/components/admin/NotificationBell"
 import AdminQueries from "@/requestapi/queries/adminQueries"
 import { AdminRecord } from "@/requestapi/instances/adminRequest"
 import { getError } from "@/lib/requestError"
@@ -106,9 +107,7 @@ export default function AdminsPage() {
             <Plus className="h-4 w-4" />
             Create Admin
           </button>
-          <button className="relative p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50">
-            <Bell className="h-4 w-4 text-gray-600" />
-          </button>
+          <NotificationBell />
         </div>
       </div>
 

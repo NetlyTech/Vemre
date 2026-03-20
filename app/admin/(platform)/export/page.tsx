@@ -2,9 +2,10 @@
 
 import { useState, useMemo, useEffect } from "react"
 import {
-  Bell, Search, Download, Users, ArrowLeftRight,
+  Search, Download, Users, ArrowLeftRight,
   ShieldCheck, DollarSign, TrendingUp, FileText, CheckCircle2
 } from "lucide-react"
+import NotificationBell from "@/components/admin/NotificationBell"
 import dayjs from "@/lib/dayjs"
 import UserQueries from "@/requestapi/queries/userQueries"
 import FxQueries from "@/requestapi/queries/fxQueries"
@@ -279,9 +280,7 @@ export default function ExportPage() {
             />
             <Search className="absolute left-2.5 h-4 w-4 text-gray-400" />
           </div>
-          <button className="relative p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50">
-            <Bell className="h-4 w-4 text-gray-600" />
-          </button>
+          <NotificationBell />
         </div>
       </div>
 
