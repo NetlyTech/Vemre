@@ -60,6 +60,14 @@ class AdminQueries {
       queryFn: () => adminServices.getDeletedUsers(),
     })
   }
+
+  useDashboard = () => {
+    return useQuery({
+      queryKey: ["adminDashboard"],
+      queryFn: () => adminServices.getDashboard(),
+      refetchInterval: 60_000,
+    })
+  }
 }
 
 export default AdminQueries

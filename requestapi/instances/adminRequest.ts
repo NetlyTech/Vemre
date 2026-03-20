@@ -27,6 +27,36 @@ export type DeletedUserRecord = {
   createdAt?: string
 }
 
+export type DashboardData = {
+  totalUsers:   { value: number; changePercent: number }
+  revenue:      { value: number; changePercent: number }  // NGN from Revenue collection
+  transactions: { value: number; changePercent: number }
+  pendingKyc:   { value: number; newToday: number }
+  revenueOverview: { _id: { year: number; month: number }; total: number }[]
+  dailyTransactions: { _id: number; count: number }[]    // _id: 1=Sun 2=Mon … 7=Sat
+  recentActivity: {
+    transactions: {
+      _id: string
+      type?: string
+      isPending?: boolean
+      status?: string
+      amount?: number
+      senderName?: string
+      user?: { fullname: string }
+      createdAt?: string
+      updatedAt?: string
+    }[]
+    kyc: {
+      _id: string
+      admin_verify_status: string
+      firstname?: string
+      lastname?: string
+      user?: { fullname: string }
+      updatedAt?: string
+    }[]
+  }
+}
+
 class AdminServices {
   async getAllAdmins(): Promise<{ data: AdminRecord[] }> {
     const response = await rootAxiosInstance.get("/api/admin/all")
@@ -65,6 +95,11 @@ class AdminServices {
 
   async getDeletedUsers(): Promise<{ data: DeletedUserRecord[] }> {
     const response = await rootAxiosInstance.get("/api/admin/users/deleted")
+    return response.data
+  }
+
+  async getDashboard(): Promise<DashboardData> {
+    const response = await rootAxiosInstance.get("/api/admin/dashboard")
     return response.data
   }
 }
