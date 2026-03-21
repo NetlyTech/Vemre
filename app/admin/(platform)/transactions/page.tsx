@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Filter, Banknote, AlertTriangle, CheckCircle2, Landmark } from "lucide-react"
+import { Search, Filter, Banknote, AlertTriangle, CheckCircle2, Landmark, TrendingUp } from "lucide-react"
 import NotificationBell from "@/components/admin/NotificationBell"
+import AdminQueries from "@/requestapi/queries/adminQueries"
 import UserQueries from "@/requestapi/queries/userQueries"
 import dayjs from "@/lib/dayjs"
 import { formatInky } from "@/lib/utils"
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/dialog"
 
 const { useAlTransactions, useBulkPayout } = new UserQueries()
+const { useCurrentFxRate } = new AdminQueries()
 
 type Transaction = {
   id: string
@@ -65,6 +67,8 @@ type Transaction = {
 export default function AllTransactions() {
   const { data, isLoading } = useAlTransactions()
   const { mutateAsync: runBulkPayout, isPending: isBulkPaying } = useBulkPayout()
+  const { data: fxData } = useCurrentFxRate()
+  const currentFxRate = fxData?.data?.[0]?.rate ?? 0
 
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
@@ -79,8 +83,9 @@ export default function AllTransactions() {
     const accountNumber = item.type === "Received" ? item.user?.bank_account?.accountNumber : item.account_number
     const accountName = item.type === "Received" ? item.user?.bank_account?.accountName : item.recipientName
     const amount = item.amount ?? 0
-    const serviceFee = item.type === "Received" && !item.isVemreCharge ? +(amount * 0.2).toFixed(2) : 0
-    const net = serviceFee ? +(amount - serviceFee).toFixed(2) : amount
+    // Fee (20%) and Net only apply to incoming payments — never to payouts
+    const serviceFee = item.type === "Received" && !item.isVemreCharge ? +(amount * 0.2).toFixed(2) : undefined
+    const net = serviceFee !== undefined ? +(amount - serviceFee).toFixed(2) : undefined
 
     return {
       _id: item._id,
@@ -307,10 +312,10 @@ export default function AllTransactions() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
-                      {t.serviceFee ? formatInky(t.serviceFee.toString()) : <span className="text-gray-300">—</span>}
+                      {t.type === "Received" && t.serviceFee ? formatInky(t.serviceFee.toString()) : <span className="text-gray-300">—</span>}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-800 font-medium">
-                      {formatInky(t.net?.toString() ?? "0")}
+                      {t.type === "Received" ? formatInky(t.net?.toString() ?? "0") : <span className="text-gray-300">—</span>}
                     </td>
                     <td className="px-4 py-3"><StatusBadge status={t.status} /></td>
                     <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{t.date}</td>
@@ -377,16 +382,41 @@ export default function AllTransactions() {
                     <h3 className="text-base font-semibold text-gray-900">Confirm Disbursement</h3>
                     <button onClick={() => setBulkPayoutOpen(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 mb-4">
+
+                  {/* Top row — count + USD total */}
+                  <div className="grid grid-cols-2 gap-3 mb-3">
                     <div className="rounded-xl bg-amber-50 border border-amber-100 p-3">
-                      <p className="text-xs text-amber-600 font-medium mb-1">Completed Transactions</p>
+                      <p className="text-xs text-amber-600 font-medium mb-1">Transactions</p>
                       <p className="text-2xl font-bold text-amber-800">{pendingCount}</p>
                     </div>
                     <div className="rounded-xl bg-amber-50 border border-amber-100 p-3">
-                      <p className="text-xs text-amber-600 font-medium mb-1">Total Received</p>
-                      <p className="text-xl font-bold text-amber-800">${pendingTotal.toLocaleString()}</p>
+                      <p className="text-xs text-amber-600 font-medium mb-1">Total Received (USD)</p>
+                      <p className="text-xl font-bold text-amber-800">${pendingTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
                   </div>
+
+                  {/* FX breakdown */}
+                  <div className="rounded-xl bg-primary/5 border border-primary/10 p-3.5 mb-3">
+                    <div className="flex items-center gap-2 mb-2.5">
+                      <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                      <p className="text-xs font-semibold text-primary uppercase tracking-wide">FX Conversion Preview</p>
+                    </div>
+                    {currentFxRate > 0 ? (
+                      <div className="grid grid-cols-2 gap-y-2 text-sm">
+                        <span className="text-gray-500 text-xs">Current FX Rate</span>
+                        <span className="font-mono font-semibold text-gray-800 text-xs">₦{currentFxRate.toLocaleString()} / $1</span>
+                        <span className="text-gray-500 text-xs">Gross NGN</span>
+                        <span className="font-semibold text-gray-800 text-xs">₦{(pendingTotal * currentFxRate).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                        <span className="text-gray-500 text-xs">Commission (20%)</span>
+                        <span className="text-red-500 text-xs font-medium">− ₦{(pendingTotal * currentFxRate * 0.2).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                        <span className="text-gray-700 text-xs font-semibold border-t border-primary/10 pt-2">Est. Net Payout (NGN)</span>
+                        <span className="font-bold text-green-700 text-sm border-t border-primary/10 pt-2">₦{(pendingTotal * currentFxRate * 0.8).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-amber-600">No FX rate set — please update it before disbursing.</p>
+                    )}
+                  </div>
+
                   <div className="flex gap-2.5 rounded-lg border border-gray-200 bg-gray-50 p-3 mb-5">
                     <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                     <p className="text-xs text-gray-600 leading-relaxed">

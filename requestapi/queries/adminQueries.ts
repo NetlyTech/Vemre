@@ -76,6 +76,14 @@ class AdminQueries {
       refetchInterval: 60_000,
     })
   }
+
+  useCurrentFxRate = () => {
+    return useQuery({
+      queryKey: ["currentFxRate"],
+      queryFn: () => adminServices.getCurrentFxRate(),
+      refetchInterval: 60_000,
+    })
+  }
 }
 
 export default AdminQueries
