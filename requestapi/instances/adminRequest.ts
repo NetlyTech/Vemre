@@ -112,6 +112,11 @@ class AdminServices {
     const response = await rootAxiosInstance.get("/api/admin/revenue")
     return response.data
   }
+
+  async getCurrentFxRate(): Promise<{ data: { rate: number; baseCurrency: string; targetCurrency: string }[] }> {
+    const response = await rootAxiosInstance.get("/api/fx/current?baseCurrency=USD&targetCurrency=NGN")
+    return response.data
+  }
 }
 
 export default AdminServices
