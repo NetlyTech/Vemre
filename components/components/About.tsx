@@ -16,7 +16,7 @@ const About = () => {
         <div className="w-full md:w-full lg:w-1/2 md:pl-0 lg:pl-10">
           <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4 md:mb-0 md:py-6 text-black text-center">About</h2>
           <p className="text-black text-justify">
-          <strong className='font-bold  text-black'>VEMRE </strong>  is a technology company, bridging the gap between Nigeria  Tech  Savvies (e.g graphics designers, website/app developers, content writers, data scientists/analysts, cybersecurity engineers/analysts etc) and the GLOBAL TECH SPACE MARKET. We facilitate Tech Savvies penetration into the GLOBAL TECH ECOSYSTEM, helping them to render their services and get paid easily through a SECURE, RELIABLE, EASY, AND ROBUST, (SRER) international payment receiving gateway platform which provides all available means of receiving payment internationally.
+          <strong className='font-bold  text-black'>VEMRE </strong> is a technology company, bridging the gap between Nigeria Tech Savvies (e.g graphics designers, website/app developers, content writers, data scientists/analysts, cybersecurity engineers/analysts etc) and the GLOBAL TECH SPACE MARKET. We facilitate Tech Savvies penetration into the GLOBAL TECH ECOSYSTEM, helping them to render their services and get paid easily through our partnership with a duly registered international payment merchandise company in the United States of America who operates a SECURE, RELIABLE, EASY, AND ROBUST, (SRER) payment receiving, and disbursing network, which provides all available means of receiving and disbursing payment internationally.
           </p>
           <p className="text-black mt-4">
           <strong className='font-bold text-black'>MISSION: </strong>  

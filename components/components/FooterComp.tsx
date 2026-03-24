@@ -6,7 +6,7 @@ import Lemfi from '../components/logo/lemfi.jpeg';
 import VemreLogo from '../components/logo/vemre1.png';
 import { FaGooglePlay } from "react-icons/fa6";
 import { FaApple } from "react-icons/fa";
-import { FaFacebook, FaInstagram, FaLinkedin } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaLinkedin, FaTiktok } from 'react-icons/fa';
 import { FaXTwitter } from "react-icons/fa6";
 import Link from 'next/link';
 
@@ -35,17 +35,21 @@ import Link from 'next/link';
           <div className="flex flex-col items-center p-4">
       <h1 className="text-xl font-bold mb-4">Follow Us</h1>
       <div className="flex space-x-4">
-        <a href="#" target="_blank" rel="noopener noreferrer">
+        <a href="https://www.facebook.com/share/1CJ21PHFEK/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer">
           <FaFacebook className="text-white hover:text-blue-800 transition duration-200 size-6 lg:size-8"/>
         </a>
-        <a href="#" target="_blank" rel="noopener noreferrer">
+        <a href="https://x.com/vemreenterpvi1?s=21" target="_blank" rel="noopener noreferrer">
           <FaXTwitter className="hover:text-blue-600 transition duration-200 size-6  lg:size-8" />
         </a>
-        <a href="#" target="_blank" rel="noopener noreferrer">
+        <a href="https://www.instagram.com/vemrepg?igsh=MWM4OGEyNnVhNjNwZA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer">
           <FaInstagram className="text-pink-600 hover:text-pink-700 transition duration-200 size-6 lg:size-8" />
         </a>
         <a href="#" target="_blank" rel="noopener noreferrer">
           <FaLinkedin className="text-blue-500 hover:text-blue-900 transition duration-200 size-6 lg:size-8" />
+        </a>
+
+        <a href="https://www.tiktok.com/@vemre_enterprise1?_r=1&_t=ZS-94v7KC0xzWv" target="_blank" rel="noopener noreferrer">
+        <FaTiktok className="text-black hover:text-gray-800 transition duration-200 size-6 lg:size-8" />
         </a>
       </div>
     </div>
@@ -54,7 +58,7 @@ import Link from 'next/link';
           <div className='md:pr-5 lg:mr-12 px-4 py-2 flex flex-col items-center md:flex md:flex-col'>
             <h1 className='pb-0 text-sm pl-2'>Install Our App</h1>
             <div className='flex gap-2 justify-center md:justify-start'>
-              <a href="#">
+              <a href="https://play.google.com/store/apps/details?id=com.vemre.vemreapp">
                 <div className='flex flex-row items-center gap-4 cursor-pointer'>
                   <h1 className='text-sm font-semibold border py-2 px-2 flex gap-3 items-center bg-black hover:bg-[#123b49]'> <FaGooglePlay /> Google </h1>
                 </div>

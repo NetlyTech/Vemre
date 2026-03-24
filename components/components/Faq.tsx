@@ -48,7 +48,7 @@ const Accordion = () => {
     {
        id: 3,
       title: 'Is Vemre’s international payment gateway secure?',
-      content: "Yes, our SRER (Secure, Reliable, Easy, and Robust) payment gateway ensures safe and efficient international transactions.",
+      content: "Yes, our international payment merchandise company partner uses a SRER (Secure, Reliable, Easy, and Robust) payment receiving, and disbursing network for efficient international transactions.",
     },
     {
        id: 4,
