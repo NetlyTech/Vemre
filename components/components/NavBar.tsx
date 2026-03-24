@@ -32,6 +32,7 @@ const Navbar = () => {
     setNav(!nav);
   };
 
+
   // Function to handle smooth scrolling (guarded for SSR)
   const scrollToSection = (id: string) => {
     if (typeof document !== 'undefined') {
@@ -46,8 +47,20 @@ const Navbar = () => {
   // Unified click handler for all nav items (guarded for SSR)
   const handleNavClick = (item: NavItem) => {
     if (item.id === 6) {
-      // Dashboard: Always navigate
-      router.push('/dashboard');
+      // Dashboard: Always navigate 
+       const token = localStorage.getItem("route");
+    if (token) {
+      router.push(`/${token}`)
+      
+    }
+
+    } else if (item.id === 7){
+
+       document.cookie = "auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+
+    localStorage.removeItem("accessToken")
+    router.replace("/login")
+
     } else if (item.link) {
       // Contact: Navigate if not already there; otherwise scroll to top (guarded)
       if (pathname === item.link) {
@@ -78,7 +91,7 @@ const Navbar = () => {
 
         const isAuthenticated = !!(token && authCookie);
         const newNavItems: NavItem[] = isAuthenticated
-          ? [...navRoute, { id: 6, text: 'Dashboard', sectionId: 'dashboard' }]
+          ? [...navRoute, { id: 6, text: 'Dashboard', sectionId: 'dashboard' }, { id: 7, text: 'Logout', sectionId: 'logout' }]
           : navRoute;
 
         // Only update if changed (prevents unnecessary re-renders)

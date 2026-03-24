@@ -1,8 +1,34 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import QueryClientWrapper from "@/components/QuertWrapper";
-import Navbar from "@/components/components/NavBar";
-import FooterComp from "@/components/components/FooterComp";
+
+const productSans = localFont({
+  src: [
+    {
+      path: "./fonts/product-sans/Product Sans Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/product-sans/Product Sans Italic.ttf",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "./fonts/product-sans/Product Sans Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "./fonts/product-sans/Product Sans Bold Italic.ttf",
+      weight: "700",
+      style: "italic",
+    },
+  ],
+  variable: "--font-product-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Vemre",
@@ -34,11 +60,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className={productSans.variable}>
         <QueryClientWrapper>
-          <Navbar />
           {children}
-          <FooterComp />
         </QueryClientWrapper>
       </body>
     </html>
