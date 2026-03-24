@@ -49,7 +49,7 @@ import Link from 'next/link';
         </a>
 
         <a href="https://www.tiktok.com/@vemre_enterprise1?_r=1&_t=ZS-94v7KC0xzWv" target="_blank" rel="noopener noreferrer">
-        <FaTiktok className="text-black hover:text-gray-800 transition duration-200 size-6 lg:size-8" />
+        <FaTiktok className="text-white hover:text-gray-600 transition duration-200 size-6 lg:size-8" />
         </a>
       </div>
     </div>
