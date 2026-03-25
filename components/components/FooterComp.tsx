@@ -44,9 +44,9 @@ import Link from 'next/link';
         <a href="https://www.instagram.com/vemrepg?igsh=MWM4OGEyNnVhNjNwZA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer">
           <FaInstagram className="text-pink-600 hover:text-pink-700 transition duration-200 size-6 lg:size-8" />
         </a>
-        <a href="#" target="_blank" rel="noopener noreferrer">
+        {/* <a href="#" target="_blank" rel="noopener noreferrer">
           <FaLinkedin className="text-blue-500 hover:text-blue-900 transition duration-200 size-6 lg:size-8" />
-        </a>
+        </a> */}
 
         <a href="https://www.tiktok.com/@vemre_enterprise1?_r=1&_t=ZS-94v7KC0xzWv" target="_blank" rel="noopener noreferrer">
         <FaTiktok className="text-white hover:text-gray-600 transition duration-200 size-6 lg:size-8" />
@@ -63,7 +63,7 @@ import Link from 'next/link';
                   <h1 className='text-sm font-semibold border py-2 px-2 flex gap-3 items-center bg-black hover:bg-[#123b49]'> <FaGooglePlay /> Google </h1>
                 </div>
               </a>
-              <a href="#">
+              <a href="App store: https://apps.apple.com/gb/app/vemre/id6757099744">
                 <div className='flex flex-row items-center gap-4'>
                   <h1 className='text-[14px] font-semibold border py-2 px-2 flex gap-2 items-center bg-black hover:bg-[#123b49]'> <FaApple /> Apple </h1>
                 </div>
