@@ -63,7 +63,7 @@ import Link from 'next/link';
                   <h1 className='text-sm font-semibold border py-2 px-2 flex gap-3 items-center bg-black hover:bg-[#123b49]'> <FaGooglePlay /> Google </h1>
                 </div>
               </a>
-              <a href="App store: https://apps.apple.com/gb/app/vemre/id6757099744">
+              <a href="https://apps.apple.com/gb/app/vemre/id6757099744">
                 <div className='flex flex-row items-center gap-4'>
                   <h1 className='text-[14px] font-semibold border py-2 px-2 flex gap-2 items-center bg-black hover:bg-[#123b49]'> <FaApple /> Apple </h1>
                 </div>
