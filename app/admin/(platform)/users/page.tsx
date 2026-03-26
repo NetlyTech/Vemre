@@ -373,7 +373,12 @@ export default function UsersPage() {
                 {(() => {
                   const userTxns = (txData?.data ?? []).filter(t => t.user?.email === selectedUser.email)
                   if (userTxns.length === 0) return null
-                  const netEarnings = userTxns.reduce((sum, t) => sum + (t.amount ?? 0), 0)
+                  const usd = (n: number) =>
+                    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(n)
+                  const settledReceived = userTxns.filter(t => t.type === "Received" && !t.isPending)
+                  const grossUSD = settledReceived.reduce((sum, t) => sum + (t.amount ?? 0), 0)
+                  const commissionUSD = grossUSD * 0.2
+                  const netUSD = grossUSD * 0.8
                   return (
                     <div className="rounded-lg border border-gray-100 p-3">
                       <div className="flex items-center gap-1.5 mb-3">
@@ -386,10 +391,16 @@ export default function UsersPage() {
                           <p className="text-sm font-semibold text-gray-800">{userTxns.length}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1">Ledger Current Net Earnings</p>
-                          <p className="text-sm font-semibold text-gray-800">
-                            {new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 2 }).format(netEarnings)}
-                          </p>
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1">Gross Received (USD)</p>
+                          <p className="text-sm font-semibold text-gray-800">{usd(grossUSD)}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1">Platform Commission (20%)</p>
+                          <p className="text-sm font-semibold text-red-500">- {usd(commissionUSD)}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 mb-1">Net Earnings (USD)</p>
+                          <p className="text-sm font-semibold text-green-600">{usd(netUSD)}</p>
                         </div>
                       </div>
                     </div>
