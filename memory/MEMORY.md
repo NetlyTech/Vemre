@@ -46,13 +46,30 @@ app/
 - `StatusBadge.tsx` — colored pill: active/approved/completed=green, pending=amber, processing=blue, suspended/failed/rejected=red
 - `UserAvatar.tsx` — initials avatar with deterministic color from name hash
 - `AdminSidenav.tsx` — dark green sidebar, MAIN nav (Dashboard, Users, KYC Review, Transactions, FX Rates, Export Data) + SYSTEM (Settings)
+- `NotificationBell.tsx` — bell icon with red unread-count badge, dropdown with up to 20 notifications (relative timestamps), "Mark all read" button, click-outside dismiss
 
 ## Key Files
 - `lib/auth.type.ts` — Zod schemas; userSchema has admin.fullname (not name)
 - `middleware.ts` — Protects /admin/* routes, redirects to /admin/login
 - `requestapi/axiosinstance.ts` — Axios with Bearer token from localStorage
-- `requestapi/queries/userQueries.ts` — useAlTransactions, useAllKycs, setKycStatus, setCreateuserWithdrawal
+- `requestapi/queries/userQueries.ts` — useAlTransactions, useAllKycs, setKycStatus, useBulkPayout
+- `requestapi/queries/adminQueries.ts` — useCurrentFxRate, usePayoutPreflight(enabled), useAdminNotifications, useMarkNotificationsRead, useDeletedUsers
 - `requestapi/queries/fxQueries.ts` — useCurrentRate, useRateHistory, useUpdateRate
+
+## Payout Preflight Pattern
+The bulk payout dialog uses an `enabled` flag to control when the preflight query fires:
+```ts
+const [preflightEnabled, setPreflightEnabled] = useState(false)
+const { data: preflight, isLoading: preflightLoading } = usePayoutPreflight(preflightEnabled)
+
+// Open dialog:
+setBulkPayoutOpen(true); setPreflightEnabled(true)
+
+// Close dialog:
+setBulkPayoutOpen(false); setPreflightEnabled(false)
+```
+`usePayoutPreflight` uses `staleTime: 0` and `gcTime: 0` so it always fetches fresh data when enabled.
+The Confirm button is disabled while `preflightLoading` or when `preflight?.blocked` is true.
 
 ## Sidenav Items (new design)
 MAIN: Dashboard, Users, KYC Review, Transactions (intl), FX Rates (intl), Export Data
