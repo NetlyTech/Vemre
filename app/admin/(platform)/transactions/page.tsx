@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog"
 
 const { useAlTransactions, useBulkPayout } = new UserQueries()
-const { useCurrentFxRate } = new AdminQueries()
+const { useCurrentFxRate, usePayoutPreflight } = new AdminQueries()
 
 type Transaction = {
   id: string
@@ -77,6 +77,8 @@ export default function AllTransactions() {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
   const [bulkPayoutOpen, setBulkPayoutOpen] = useState(false)
   const [bulkPayoutResult, setBulkPayoutResult] = useState<{ message: string; processed?: number; skipped?: number } | null>(null)
+  const [preflightEnabled, setPreflightEnabled] = useState(false)
+  const { data: preflight, isLoading: preflightLoading } = usePayoutPreflight(preflightEnabled)
 
   let transactions: Transaction[] = data?.data?.map(item => {
     const bankName = item.type === "Received" ? item.user?.bank_account?.bankName : item.bank_name
@@ -182,7 +184,7 @@ export default function AllTransactions() {
           </div>
           {/* Bulk payout — always visible so admin can trigger any time (e.g. every Friday) */}
           <button
-            onClick={() => { setBulkPayoutResult(null); setBulkPayoutOpen(true) }}
+            onClick={() => { setBulkPayoutResult(null); setBulkPayoutOpen(true); setPreflightEnabled(true) }}
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 transition-colors"
           >
             <Banknote className="h-4 w-4" />
@@ -337,37 +339,37 @@ export default function AllTransactions() {
         </div>
       </div>
 
-      {/* Bulk payout confirmation dialog */}
+      {/* Bulk payout dialog — preflight-aware */}
       {bulkPayoutOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl w-full max-w-md mx-4 shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+
+            {/* ── Success state ── */}
             {bulkPayoutResult ? (
               <>
-                <div className="h-1.5 w-full bg-green-500" />
+                <div className="h-1.5 w-full bg-green-500 shrink-0" />
                 <div className="p-6 text-center">
                   <div className="mx-auto mb-4 h-14 w-14 rounded-full bg-green-50 flex items-center justify-center">
                     <CheckCircle2 className="h-7 w-7 text-green-600" />
                   </div>
-                  <h3 className="text-base font-semibold text-gray-900 mb-1">Bulk Payout Initiated</h3>
+                  <h3 className="text-base font-semibold text-gray-900 mb-1">Payout Initiated</h3>
                   <p className="text-sm text-gray-500 mb-4">{bulkPayoutResult.message}</p>
-                  {(bulkPayoutResult.processed != null || bulkPayoutResult.skipped != null) && (
-                    <div className="grid grid-cols-2 gap-3 mb-5">
-                      {bulkPayoutResult.processed != null && (
-                        <div className="rounded-lg bg-green-50 p-3">
-                          <p className="text-xl font-bold text-green-700">{bulkPayoutResult.processed}</p>
-                          <p className="text-xs text-green-600 mt-0.5">Processed</p>
-                        </div>
-                      )}
-                      {bulkPayoutResult.skipped != null && (
-                        <div className="rounded-lg bg-gray-50 p-3">
-                          <p className="text-xl font-bold text-gray-700">{bulkPayoutResult.skipped}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">Skipped</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <div className="grid grid-cols-2 gap-3 mb-5">
+                    {bulkPayoutResult.processed != null && (
+                      <div className="rounded-lg bg-green-50 p-3">
+                        <p className="text-xl font-bold text-green-700">{bulkPayoutResult.processed}</p>
+                        <p className="text-xs text-green-600 mt-0.5">Processed</p>
+                      </div>
+                    )}
+                    {bulkPayoutResult.skipped != null && (
+                      <div className="rounded-lg bg-gray-50 p-3">
+                        <p className="text-xl font-bold text-gray-700">{bulkPayoutResult.skipped}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Skipped</p>
+                      </div>
+                    )}
+                  </div>
                   <button
-                    onClick={() => setBulkPayoutOpen(false)}
+                    onClick={() => { setBulkPayoutOpen(false); setPreflightEnabled(false) }}
                     className="w-full py-2.5 text-sm font-semibold text-white bg-primary rounded-lg hover:opacity-90"
                   >
                     Done
@@ -376,70 +378,130 @@ export default function AllTransactions() {
               </>
             ) : (
               <>
-                <div className="h-1.5 w-full bg-amber-500" />
-                <div className="p-6">
+                <div className={`h-1.5 w-full shrink-0 ${preflight?.blocked ? "bg-red-500" : "bg-amber-500"}`} />
+                <div className="p-5 overflow-y-auto flex-1">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-base font-semibold text-gray-900">Confirm Disbursement</h3>
-                    <button onClick={() => setBulkPayoutOpen(false)} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+                    <button onClick={() => { setBulkPayoutOpen(false); setPreflightEnabled(false) }} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
                   </div>
 
-                  {/* Top row — count + USD total */}
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div className="rounded-xl bg-amber-50 border border-amber-100 p-3">
-                      <p className="text-xs text-amber-600 font-medium mb-1">Transactions</p>
-                      <p className="text-2xl font-bold text-amber-800">{pendingCount}</p>
+                  {/* Preflight loading */}
+                  {preflightLoading && (
+                    <div className="flex flex-col items-center justify-center py-10 gap-3">
+                      <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                      <p className="text-sm text-gray-500">Running pre-flight checks…</p>
                     </div>
-                    <div className="rounded-xl bg-amber-50 border border-amber-100 p-3">
-                      <p className="text-xs text-amber-600 font-medium mb-1">Total Received (USD)</p>
-                      <p className="text-xl font-bold text-amber-800">${pendingTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                    </div>
-                  </div>
+                  )}
 
-                  {/* FX breakdown */}
-                  <div className="rounded-xl bg-primary/5 border border-primary/10 p-3.5 mb-3">
-                    <div className="flex items-center gap-2 mb-2.5">
-                      <TrendingUp className="h-3.5 w-3.5 text-primary" />
-                      <p className="text-xs font-semibold text-primary uppercase tracking-wide">FX Conversion Preview</p>
-                    </div>
-                    {currentFxRate > 0 ? (
-                      <div className="grid grid-cols-2 gap-y-2 text-sm">
-                        <span className="text-gray-500 text-xs">Current FX Rate</span>
-                        <span className="font-mono font-semibold text-gray-800 text-xs">₦{currentFxRate.toLocaleString()} / $1</span>
-                        <span className="text-gray-500 text-xs">Gross NGN</span>
-                        <span className="font-semibold text-gray-800 text-xs">₦{(pendingTotal * currentFxRate).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-                        <span className="text-gray-500 text-xs">Commission (20%)</span>
-                        <span className="text-red-500 text-xs font-medium">− ₦{(pendingTotal * currentFxRate * 0.2).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-                        <span className="text-gray-700 text-xs font-semibold border-t border-primary/10 pt-2">Est. Net Payout (NGN)</span>
-                        <span className="font-bold text-green-700 text-sm border-t border-primary/10 pt-2">₦{(pendingTotal * currentFxRate * 0.8).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                  {/* Hard block */}
+                  {!preflightLoading && preflight?.blocked && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 p-4 mb-4">
+                      <div className="flex items-start gap-2.5">
+                        <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-semibold text-red-700 mb-1">Payout Blocked</p>
+                          <p className="text-xs text-red-600">{preflight.blockReason}</p>
+                        </div>
                       </div>
-                    ) : (
-                      <p className="text-xs text-amber-600">No FX rate set — please update it before disbursing.</p>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
-                  <div className="flex gap-2.5 rounded-lg border border-gray-200 bg-gray-50 p-3 mb-5">
-                    <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                    <p className="text-xs text-gray-600 leading-relaxed">
-                      This will initiate a <strong>Paystack bulk transfer</strong> to pay all freelancers
-                      with completed transactions. Users without a saved Paystack recipient code will be{" "}
-                      <strong>skipped</strong> automatically.
-                    </p>
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setBulkPayoutOpen(false)}
-                      className="flex-1 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleBulkPayout}
-                      disabled={isBulkPaying}
-                      className="flex-1 py-2.5 text-sm font-semibold text-white bg-amber-600 rounded-lg hover:bg-amber-700 disabled:opacity-40"
-                    >
-                      {isBulkPaying ? "Processing…" : `Pay ${pendingCount} Freelancer${pendingCount !== 1 ? "s" : ""}`}
-                    </button>
-                  </div>
+                  {/* Pre-flight summary */}
+                  {!preflightLoading && preflight && !preflight.blocked && (
+                    <>
+                      {/* Summary row */}
+                      <div className="grid grid-cols-3 gap-2 mb-3">
+                        <div className="rounded-lg bg-amber-50 border border-amber-100 p-2.5 text-center">
+                          <p className="text-lg font-bold text-amber-800">{preflight.summary.totalRecipients}</p>
+                          <p className="text-[10px] text-amber-600 font-medium">Recipients</p>
+                        </div>
+                        <div className="rounded-lg bg-green-50 border border-green-100 p-2.5 text-center">
+                          <p className="text-sm font-bold text-green-800">₦{preflight.summary.totalNGN.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                          <p className="text-[10px] text-green-600 font-medium">Total Payout</p>
+                        </div>
+                        <div className="rounded-lg bg-gray-50 border border-gray-100 p-2.5 text-center">
+                          <p className="text-lg font-bold text-gray-700">{preflight.summary.skippedCount}</p>
+                          <p className="text-[10px] text-gray-500 font-medium">Skipped</p>
+                        </div>
+                      </div>
+
+                      {/* FX rate */}
+                      <div className="flex items-center justify-between rounded-lg bg-primary/5 border border-primary/10 px-3 py-2 mb-3 text-xs">
+                        <span className="text-gray-500">FX Rate</span>
+                        <span className="font-mono font-semibold text-gray-800">₦{preflight.currentRate.toLocaleString()} / $1</span>
+                        <span className="text-gray-500">USD Total</span>
+                        <span className="font-semibold text-gray-800">${preflight.summary.totalUSD.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                      </div>
+
+                      {/* Duplicate recipient warning */}
+                      {preflight.summary.hasDuplicateRecipients && (
+                        <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 mb-3">
+                          <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-xs font-semibold text-amber-700">Duplicate bank accounts detected</p>
+                            <p className="text-[11px] text-amber-600 mt-0.5">
+                              {preflight.duplicateRecipients.map(d => d.names.join(" & ")).join("; ")} share the same account. Their amounts will be merged into one transfer.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Per-user payable breakdown */}
+                      {preflight.payable.length > 0 && (
+                        <div className="rounded-lg border border-gray-100 overflow-hidden mb-3">
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 px-3 py-2 bg-gray-50 border-b border-gray-100">Will Be Paid</p>
+                          <div className="divide-y divide-gray-50 max-h-40 overflow-y-auto">
+                            {preflight.payable.map((p, i) => (
+                              <div key={i} className="flex items-center justify-between px-3 py-2 text-xs">
+                                <div>
+                                  <p className="font-medium text-gray-800">{p.name}</p>
+                                  <p className="text-gray-400">{p.bankName} ••••{p.accountLastFour}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-semibold text-green-700">₦{p.netNGN.toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
+                                  <p className="text-gray-400">fee ₦{p.paystackFee}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Skipped users */}
+                      {preflight.skipped.length > 0 && (
+                        <div className="rounded-lg border border-gray-100 overflow-hidden mb-3">
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-400 px-3 py-2 bg-gray-50 border-b border-gray-100">Will Be Skipped</p>
+                          <div className="divide-y divide-gray-50 max-h-32 overflow-y-auto">
+                            {preflight.skipped.map((s, i) => (
+                              <div key={i} className="flex items-center justify-between px-3 py-2 text-xs">
+                                <p className="font-medium text-gray-700">{s.name}</p>
+                                <p className="text-gray-400">{s.reason}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Actions */}
+                  {!preflightLoading && (
+                    <div className="flex gap-3 mt-2">
+                      <button
+                        onClick={() => { setBulkPayoutOpen(false); setPreflightEnabled(false) }}
+                        className="flex-1 py-2.5 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleBulkPayout}
+                        disabled={isBulkPaying || preflight?.blocked || !preflight}
+                        className="flex-1 py-2.5 text-sm font-semibold text-white bg-amber-600 rounded-lg hover:bg-amber-700 disabled:opacity-40"
+                      >
+                        {isBulkPaying ? "Processing…" : preflight?.blocked ? "Blocked" : `Pay ${preflight?.summary.totalRecipients ?? "…"} Freelancer${(preflight?.summary.totalRecipients ?? 0) !== 1 ? "s" : ""}`}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </>
             )}
