@@ -84,6 +84,17 @@ class AdminQueries {
       refetchInterval: 60_000,
     })
   }
+
+  // Fetched on-demand (enabled: false) — only triggered when the payout dialog opens
+  usePayoutPreflight = (enabled: boolean) => {
+    return useQuery({
+      queryKey: ["payoutPreflight"],
+      queryFn: () => adminServices.getPayoutPreflight(),
+      enabled,
+      staleTime: 0,       // always re-fetch when the dialog opens
+      gcTime: 0,          // don't cache — balance changes between runs
+    })
+  }
 }
 
 export default AdminQueries

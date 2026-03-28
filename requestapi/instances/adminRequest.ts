@@ -117,6 +117,33 @@ class AdminServices {
     const response = await rootAxiosInstance.get("/api/fx/current?baseCurrency=USD&targetCurrency=NGN")
     return response.data
   }
+
+  async getPayoutPreflight(): Promise<{
+    blocked: boolean
+    blockReason: string | null
+    currentRate: number
+    confirmedTransactions: number
+    summary: {
+      totalRecipients: number
+      totalNGN: number
+      totalUSD: number
+      skippedCount: number
+      hasDuplicateRecipients: boolean
+    }
+    payable: {
+      name: string
+      bankName: string
+      accountLastFour: string
+      balanceNGN: number
+      paystackFee: number
+      netNGN: number
+    }[]
+    skipped: { userId: string; name: string; reason: string }[]
+    duplicateRecipients: { recipient: string; names: string[] }[]
+  }> {
+    const response = await rootAxiosInstance.get("/api/admin/payout/preflight")
+    return response.data
+  }
 }
 
 export default AdminServices
